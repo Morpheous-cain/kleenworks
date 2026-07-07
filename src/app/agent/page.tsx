@@ -116,6 +116,7 @@ export default function AgentPortal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [paymentInFlight, setPaymentInFlight] = useState<string | null>(null);
+  const [paymentPhone, setPaymentPhone] = useState("");
 
   /* ---------- Helper: toggle a service on/off --------------------------- */
   const toggleService = (id: string) => {
@@ -181,8 +182,6 @@ export default function AgentPortal() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---------- Job console actions (absorbed from /attendant) -------------- */
-  // Lets the agent advance a vehicle Queue → In-Bay → Ready directly from
-  // the Workflow tab, instead of needing a separate attendant login.
   async function advanceStatus(vehicle: Vehicle, newStatus: "In-Bay" | "Ready") {
     setActionId(vehicle.id);
     try {
@@ -216,7 +215,6 @@ export default function AgentPortal() {
   }
 
   /* ---------- Derived helpers -------------------------------------------- */
-  // case‑insensitive filter so "available"/"Available" both work
   const availableBays = bays.filter(
     (b) => b.status.toLowerCase() === "available"
   );
@@ -275,8 +273,6 @@ export default function AgentPortal() {
       )
         payload.attendant_id = selectedAttendant;
 
-      console.log("🚀 Sending check‑in payload:", payload);
-
       const res = await fetch("/api/vehicles", {
         method: "POST",
         credentials: "include",
@@ -304,7 +300,6 @@ export default function AgentPortal() {
         }`,
       });
 
-      // reset form
       setPlate("");
       setCarModel("");
       setSelectedServices([]);
@@ -330,6 +325,17 @@ export default function AgentPortal() {
     method: "MPESA" | "CASH"
   ) => {
     if (!ctx) return;
+
+    // Validate phone for M-Pesa
+    if (method === "MPESA" && !paymentPhone.trim()) {
+      toast({
+        title: "Phone Required",
+        description: "Please enter the customer's phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPaymentInFlight(vehicle.id);
 
     const amount =
@@ -338,7 +344,6 @@ export default function AgentPortal() {
         : totalAmountForVehicle(vehicle);
 
     try {
-      // 1️⃣ create transaction
       const txRes = await fetch("/api/transactions", {
         method: "POST",
         credentials: "include",
@@ -373,7 +378,7 @@ export default function AgentPortal() {
         return;
       }
 
-      // 2️⃣ MPESA – STK push
+      // MPESA – STK push
       toast({
         title: "Sending M‑Pesa Push…",
         description: `Initiating STK push for ${vehicle.plate}`,
@@ -385,7 +390,7 @@ export default function AgentPortal() {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            phone: "0700000000", // TODO: pull from customer record
+            phone: paymentPhone,
             amount,
             transaction_id: tx.id,
           }),
@@ -394,8 +399,9 @@ export default function AgentPortal() {
         if (mpesaRes.ok) {
           toast({
             title: "STK Push Sent ✓",
-            description: "Customer will receive a PIN prompt on their phone.",
+            description: `Prompt sent to ${paymentPhone}`,
           });
+          setPaymentPhone(""); // Clear input on success
         } else {
           toast({
             title: "M‑Pesa config error",
@@ -456,7 +462,6 @@ export default function AgentPortal() {
           </div>
         </div>
 
-        {/* Top‑right stats */}
         <div className="hidden md:flex gap-3 items-center">
           <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
             <div className="size-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
@@ -547,7 +552,6 @@ export default function AgentPortal() {
             </CardHeader>
 
             <CardContent className="p-6 md:p-8 space-y-8">
-              {/* Plate */}
               <div className="space-y-3">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                   License Plate
@@ -560,7 +564,6 @@ export default function AgentPortal() {
                 />
               </div>
 
-              {/* Car Model */}
               <div className="space-y-3">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                   Car Make / Model <span className="text-slate-300">(Optional)</span>
@@ -573,9 +576,7 @@ export default function AgentPortal() {
                 />
               </div>
 
-              {/* Bay & Attendant selectors */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Bay */}
                 <div className="space-y-3">
                   <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                     Assign Bay (Optional)
@@ -608,7 +609,6 @@ export default function AgentPortal() {
                   </Select>
                 </div>
 
-                {/* Attendant */}
                 <div className="space-y-3">
                   <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                     Assign Attendant
@@ -627,8 +627,7 @@ export default function AgentPortal() {
                       <SelectItem value="auto">Auto‑Assign Next</SelectItem>
                       {activeAttendants.length === 0 ? (
                         <SelectItem value="none" disabled>
-                          No attendants marked Present — update attendance in
-                          manager dashboard
+                          No attendants marked Present
                         </SelectItem>
                       ) : (
                         activeAttendants.map((s) => (
@@ -642,7 +641,6 @@ export default function AgentPortal() {
                 </div>
               </div>
 
-              {/* Service picker */}
               <div className="space-y-4">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
                   Select Services
@@ -662,7 +660,7 @@ export default function AgentPortal() {
                       <button
                         key={service.id}
                         type="button"
-                        onClick={() => toggleService(service.id)} // ← fixed!
+                        onClick={() => toggleService(service.id)}
                         className={cn(
                           "flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left",
                           selectedServices.includes(service.id)
@@ -697,7 +695,6 @@ export default function AgentPortal() {
             </CardContent>
           </Card>
 
-          {/* Sticky bottom bar – Log Vehicle */}
           <div className="fixed bottom-[92px] left-0 right-0 px-4 max-w-3xl mx-auto z-40">
             <Card className="shadow-2xl border-none bg-slate-900 text-white rounded-2xl overflow-hidden">
               <CardContent className="p-4 flex items-center justify-between">
@@ -853,7 +850,6 @@ export default function AgentPortal() {
                       </div>
                     )}
 
-                    {/* In-bay live progress */}
                     {v.status === "In-Bay" && (
                       <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
                         <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400">
@@ -867,7 +863,6 @@ export default function AgentPortal() {
                       </div>
                     )}
 
-                    {/* Job console actions — was attendant-only, now lives on the agent's Workflow card */}
                     <div className="mt-4">
                       {v.status === "Queue" ? (
                         <Button
@@ -995,11 +990,18 @@ export default function AgentPortal() {
                   </CardHeader>
 
                   {v.status === "Ready" && (
-                    <CardContent className="p-3 md:p-4 bg-slate-50 space-y-2">
+                    <CardContent className="p-3 md:p-4 bg-slate-50 space-y-3">
+                      <Input
+                        type="tel"
+                        placeholder="Customer Phone (e.g. 0712345678)"
+                        className="h-10 rounded-xl bg-white border-none font-bold text-xs"
+                        value={paymentPhone}
+                        onChange={(e) => setPaymentPhone(e.target.value)}
+                      />
                       <div className="grid grid-cols-2 gap-2">
                         <Button
                           onClick={() => handlePayment(v, "MPESA")}
-                          disabled={inFlight}
+                          disabled={inFlight || !paymentPhone}
                           className="h-12 md:h-14 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-black uppercase text-[9px] tracking-widest gap-2 text-white"
                         >
                           {inFlight ? (
