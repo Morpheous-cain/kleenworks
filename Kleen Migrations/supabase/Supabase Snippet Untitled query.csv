@@ -1,0 +1,3 @@
+tenant_id,tenant_name,branch_id,branch_name,role,manager_auth_id,services_count,bays_count,inventory_count
+665d9ad3-b1f6-48a1-9c29-1303372eb782,Kleen Works,7e5d710e-f959-44c4-82dc-b04b43b1960d,Kleen Works - Main Branch,null,null,7,3,5
+145fb0cc-a2bc-42e0-a261-469f4f0cc3ee,Kleen Works,3a1230da-9c8e-48f1-9a53-dde99747f1fa,Kleen Works - Main Branch,manager,e0599e69-d5c5-4b16-84ff-423aded81eac,7,3,5
