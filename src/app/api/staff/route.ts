@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient()
   let query = supabase
     .from('staff')
-    .select('id, name, role, email, branch_id, base_salary, performance, rating, attendance_status, points, created_at')
+    .select('id, name, role, branch_id, performance, rating, attendance_status, points, created_at')
     .eq('tenant_id', ctx.tenantId)
     .order('name')
 
@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
 
   const { data, error: dbError } = await query
   if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  const normalised = (data ?? []).map((s: any) => ({
+    ...s,
+    email: null,
+    base_salary: 0,
+  }))
+
+  return NextResponse.json(normalised)
 }
 
 // POST /api/staff
