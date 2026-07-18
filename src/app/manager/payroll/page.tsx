@@ -155,7 +155,6 @@ export default function PayrollPage() {
         {[
           { label: "Total Payroll (MTD)", value: `KES ${totalPayroll.toLocaleString()}`, icon: Banknote, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Employees Paid", value: `${records.filter(r => r.status === 'Disbursed').length}/${records.length}`, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Total Tax/NHIF", value: "KES 14.5K", icon: ShieldCheck, color: "text-indigo-600", bg: "bg-indigo-50" },
           { label: "Payout Limit", value: "92%", icon: Zap, color: "text-amber-600", bg: "bg-amber-50" },
         ].map((kpi, i) => (
           <Card key={i} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group bg-white">
@@ -188,7 +187,7 @@ export default function PayrollPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-emerald-600 uppercase">Daraja Gateway Balance</span>
-                <span className="text-sm font-black text-emerald-700">KES 420,500</span>
+                <span className="text-sm font-black text-emerald-700">KES 0</span>
               </div>
             </div>
           </div>
@@ -401,23 +400,6 @@ export default function PayrollPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <div className="p-8 bg-slate-900 text-white rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl border-none">
-        <div className="absolute top-0 left-0 p-24 -ml-24 -mt-24 bg-primary/20 rounded-full blur-[100px]" />
-        <div className="size-16 bg-white/10 rounded-[1.5rem] flex items-center justify-center border border-white/10 backdrop-blur-md shrink-0 relative z-10">
-          <ShieldAlert className="size-8 text-primary" />
-        </div>
-        <div className="relative z-10 flex-1">
-          <h4 className="text-xl font-black uppercase tracking-tight italic">Compliance & Statutory Audit</h4>
-          <p className="text-slate-400 text-sm font-bold uppercase tracking-wide mt-1">KRA P9 forms for May 2024 are auto-generated. Ensure filing by the 9th to avoid penalties.</p>
-        </div>
-        <Button 
-          className="relative z-10 ml-auto rounded-2xl h-14 bg-white text-slate-900 font-black uppercase text-[10px] tracking-[0.2em] px-10 shadow-2xl hover:bg-slate-50 transition-all border-none"
-          onClick={() => toast({ title: "KRA Portal", description: "Submitting statutory returns for current cycle..." })}
-        >
-          File Returns Now
-        </Button>
-      </div>
     </div>
   );
 }

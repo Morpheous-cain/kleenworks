@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw } from "lucide-react";
+import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw, Trash2, PlusCircle, Check, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,15 @@ export default function InventoryPage() {
   const [restockItem, setRestockItem] = useState<InventoryItem | null>(null);
   const [restockQty, setRestockQty]   = useState("10");
   const [restocking, setRestocking]   = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [addItemName, setAddItemName] = useState("");
+  const [addItemStock, setAddItemStock] = useState("0");
+  const [addItemThreshold, setAddItemThreshold] = useState("5");
+  const [addItemUnit, setAddItemUnit] = useState("units");
+  const [adding, setAdding] = useState(false);
+  const [removeIds, setRemoveIds] = useState<string[]>([]);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   async function fetchInventory() {
     setLoading(true);
@@ -74,6 +83,72 @@ export default function InventoryPage() {
     }
   }
 
+  async function handleAddItem() {
+    const name = addItemName.trim();
+    if (!name) { toast({ title: "Enter item name", variant: "destructive" }); return; }
+    setAdding(true);
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          quantity: parseInt(addItemStock) || 0,
+          unit: addItemUnit,
+          reorder_level: parseInt(addItemThreshold) || 5,
+          cost_per_unit: 0,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error ?? "Add failed");
+      toast({ title: "Item added ✓", description: name });
+      setAddDialogOpen(false);
+      setAddItemName("");
+      setAddItemStock("0");
+      setAddItemThreshold("5");
+      setAddItemUnit("units");
+      fetchInventory();
+    } catch (e: unknown) {
+      toast({ title: "Add failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function handleRemoveItems() {
+    if (removeIds.length === 0) return;
+    setRemoving(true);
+    try {
+      for (const id of removeIds) {
+        const res = await fetch(`/api/inventory/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error((await res.json()).error ?? `Failed to delete ${id}`);
+      }
+      toast({ title: "Removed ✓", description: `${removeIds.length} item(s) deleted` });
+      setRemoveIds([]);
+      setRemoveDialogOpen(false);
+      fetchInventory();
+    } catch (e: unknown) {
+      toast({ title: "Remove failed", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  function toggleRemoveId(id: string) {
+    setRemoveIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }
+
+  function handleSelectAll() {
+    if (removeIds.length === items.length) {
+      setRemoveIds([]);
+    } else {
+      setRemoveIds(items.map(i => i.id));
+    }
+  }
+
   const lowCount = items.filter((i) => i.is_low_stock).length;
   const okCount  = items.filter((i) => !i.is_low_stock).length;
 
@@ -84,9 +159,14 @@ export default function InventoryPage() {
           <h1 className="text-3xl font-bold text-slate-900">Inventory</h1>
           <p className="text-slate-500">Stock levels and restock management</p>
         </div>
-        <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg-white">
-          <RefreshCw className="size-4" /> Refresh
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg-white">
+            <RefreshCw className="size-4" /> Refresh
+          </Button>
+          <Button onClick={() => { setAddDialogOpen(true); }} className="rounded-xl h-12 gap-2">
+            <PlusCircle className="size-4" /> Add Item
+          </Button>
+        </div>
       </header>
 
       {error && (
@@ -126,6 +206,19 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* Toolbar for bulk actions */}
+      {removeIds.length > 0 && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+          <span className="text-slate-700 font-medium">{removeIds.length} item(s) selected</span>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Clear</Button>
+            <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={removing} className="rounded-xl">
+              <Trash2 className="size-4" /> Remove
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Items grid */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -135,8 +228,9 @@ export default function InventoryPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => {
             const pct = Math.min(100, Math.round((item.stock / Math.max(item.low_stock_threshold * 3, 1)) * 100));
+            const selected = removeIds.includes(item.id);
             return (
-              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow-hidden", item.is_low_stock ? "ring-2 ring-red-200" : "")}>
+              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow-hidden transition-all", item.is_low_stock ? "ring-2 ring-red-200" : "", selected && "ring-2 ring-primary ring-offset-2")}>
                 <CardContent className="p-8 space-y-6">
                   <div className="flex justify-between items-start">
                     <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
@@ -164,6 +258,15 @@ export default function InventoryPage() {
                   >
                     <Plus className="size-4" /> Restock
                   </Button>
+                  {removeIds.length > 0 && (
+                    <Button
+                      variant={selected ? "default" : "outline"}
+                      className="w-full rounded-2xl h-10 text-xs font-medium gap-2 border-slate-300"
+                      onClick={() => toggleRemoveId(item.id)}
+                    >
+                      {selected ? <Check className="size-3" /> : <Check className="size-3 opacity-0" />}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -192,6 +295,59 @@ export default function InventoryPage() {
             <Button onClick={handleRestock} disabled={restocking} className="rounded-xl gap-2">
               {restocking && <Loader2 className="size-4 animate-spin" />}
               {restocking ? "Restocking..." : "Confirm Restock"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add item dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={(o) => !o && setAddDialogOpen(false)}>
+        <DialogContent className="rounded-[2rem] border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase">Add Inventory Item</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase text-slate-500">Item Name</label>
+              <Input value={addItemName} onChange={(e) => setAddItemName(e.target.value)} placeholder="e.g. Shampoo, Wax, Microfiber" className="rounded-xl h-12 border-2 text-lg font-medium" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-slate-500">Initial Stock</label>
+                <Input type="number" min="0" value={addItemStock} onChange={(e) => setAddItemStock(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-slate-500">Low Stock Threshold</label>
+                <Input type="number" min="1" value={addItemThreshold} onChange={(e) => setAddItemThreshold(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase text-slate-500">Unit</label>
+              <Input value={addItemUnit} onChange={(e) => setAddItemUnit(e.target.value)} placeholder="units, liters, kg, etc." className="rounded-xl h-12 border-2 text-lg font-medium" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="rounded-xl">Cancel</Button>
+            <Button onClick={handleAddItem} disabled={adding} className="rounded-xl gap-2">
+              {adding && <Loader2 className="size-4 animate-spin" />}
+              {adding ? "Adding..." : "Add Item"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove confirmation dialog */}
+      <Dialog open={removeDialogOpen} onOpenChange={(o) => !o && setRemoveDialogOpen(false)}>
+        <DialogContent className="rounded-[2rem] border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase">Remove {removeIds.length} Item(s)?</DialogTitle>
+          </DialogHeader>
+          <p className="text-slate-500 py-4">This action cannot be undone. The selected inventory items will be permanently deleted.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRemoveDialogOpen(false)} className="rounded-xl">Cancel</Button>
+            <Button variant="destructive" onClick={handleRemoveItems} disabled={removing} className="rounded-xl gap-2">
+              {removing && <Loader2 className="size-4 animate-spin" />}
+              {removing ? "Removing..." : "Confirm Remove"}
             </Button>
           </DialogFooter>
         </DialogContent>

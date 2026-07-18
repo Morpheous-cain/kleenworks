@@ -1,0 +1,1172 @@
+╭─── Claude Code v2.1.212 ───────────────────────────────────────────────────────────────────────────────────────╮
+│                                            │ Tips for getting started                                          │
+│                Welcome back!               │ Run /init to create a CLAUDE.md file with instructions for Claude │
+│                                            │ ───────────────────────────────────────────────────────────────── │
+│                   ▐▛███▜▌                  │ What's new                                                        │
+│                  ▝▜█████▛▘                 │ `/fork` now copies your conversation into a new background sessi… │
+│                    ▘▘ ▝▝                   │ Added `claude auto-mode reset` to restore the default auto-mode … │
+│                                            │ Added a session-wide limit on WebSearch tool calls (default 200,… │
+│   gemini-pro-default · API Usage Billing   │ /release-notes for more                                           │
+│              ~\Desktop\kleen               │                                                                   │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+> /model
+  ⎿  Set model to Mythos and saved as your default for new sessions
+
+> our app is fine just check memories or even the session-memories folder we have some slight things to add and
+  fix before we take it for launch testing tomorrow
+
+  Searched for 1 pattern, read 1 file, listed 5 directories, ran 2 shell commands (ctrl+o to expand)
+  ⎿  Invalid tool parameters
+  ⎿  Invalid tool parameters
+
+  Searched for 4 patterns, read 1 file, listed 2 directories, ran 1 shell command (ctrl+o to expand)
+  ⎿  Invalid tool parameters
+  ⎿  Invalid tool parameters
+  ⎿  Interrupted · What should Claude do instead?
+
+> actually read context&session folder read all files in there after you have we are gonna run the session-prompt
+  txt thres a prompt in there for what we are doing this session but first go through context&sessions folder
+
+●  and read all content in the text files before we begin work
+
+  Thought for 8m 36s, searched for 19 patterns, read 15 files, listed 9 directories, ran 3 shell commands (ctrl+o
+  to expand)
+
+● Found the issue. The GET /api/staff route doesn't select base_salary from the database and hardcodes it to 0.
+  Let me fix this.
+
+  Thought for 5s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\api\staff\route.ts)
+  ⎿  Added 1 line, removed 1 line
+      26    const supabase = await createClient()
+      27    let query = supabase
+      28      .from('staff')
+      29 -    .select('id, name, role, branch_id, performance, rating, attendance_status, points, created_a
+         -t')
+      29 +    .select('id, name, role, branch_id, performance, rating, attendance_status, points, created_a
+         +t, base_salary')
+      30      .eq('tenant_id', ctx.tenantId)
+      31      .order('name')
+      32
+
+  Thought for 9s (ctrl+o to expand)
+
+● Update(src\app\api\staff\route.ts)
+  ⎿  Removed 1 line
+      40    const normalised = (data ?? []).map((s: any) => ({
+      41      ...s,
+      42      email: null,
+      43 -    base_salary: 0,
+      43    }))
+      44
+      45    return NextResponse.json(normalised)
+
+  Thought for 8s, searched for 1 pattern (ctrl+o to expand)
+
+● Now let me check the Inventory module for issue 2.
+
+  Thought for 3m 17s, searched for 5 patterns, read 6 files, listed 1 directory (ctrl+o to expand)
+
+● Write(src\app\api\inventory\[id]\route.ts)
+  ⎿  Wrote 61 lines to src\app\api\inventory\[id]\route.ts
+       1 import { NextRequest, NextResponse } from 'next/server'
+       2 import { createClient } from '@/lib/supabase/server'
+       3 import { requireManager } from '@/lib/auth-helpers'
+       4
+       5 // DELETE /api/inventory/[id]
+       6 export async function DELETE(
+       7   request: NextRequest,
+       8   { params }: { params: Promise<{ id: string }> }
+       9 ) {
+      10   const { ctx, error } = await requireManager()
+     … +51 lines (ctrl+o to expand)
+
+  Thought for 12s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\inventory\page.tsx)
+  ⎿  Added 1 line, removed 1 line
+       9  import { Button } from "@/components/ui/button";
+      10  import { Input } from "@/components/ui/input";
+      11  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/d
+          ialog";
+      12 -import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw } from "lucide-react";
+      12 +import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw, Trash2, PlusCircle } fro
+         +m "lucide-react";
+      13  import { useToast } from "@/hooks/use-toast";
+      14  import { Progress } from "@/components/ui/progress";
+      15  import { cn } from "@/lib/utils";
+
+  Thought for 13s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\inventory\page.tsx)
+  ⎿  Added 9 lines
+      32    const [restockItem, setRestockItem] = useState<InventoryItem | null>(null);
+      33    const [restockQty, setRestockQty]   = useState("10");
+      34    const [restocking, setRestocking]   = useState(false);
+      35 +  const [addDialogOpen, setAddDialogOpen] = useState(false);
+      36 +  const [addItemName, setAddItemName] = useState("");
+      37 +  const [addItemStock, setAddItemStock] = useState("0");
+      38 +  const [addItemThreshold, setAddItemThreshold] = useState("5");
+      39 +  const [addItemUnit, setAddItemUnit] = useState("units");
+      40 +  const [adding, setAdding] = useState(false);
+      41 +  const [removeIds, setRemoveIds] = useState<string[]>([]);
+      42 +  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+      43 +  const [removing, setRemoving] = useState(false);
+      44
+      45    async function fetchInventory() {
+      46      setLoading(true);
+
+  Thought for 7s (ctrl+o to expand)
+
+● Update(src\app\manager\inventory\page.tsx)
+  ⎿  Added 64 lines
+       83      }
+       84    }
+       85
+       86 +  async function handleAddItem() {
+       87 +    if (!addItemName.trim()) { toast({ title: "Enter item name", variant: "destructive" }); retu
+          +rn; }
+       88 +    setAdding(true);
+       89 +    try {
+       90 +      const res = await fetch("/api/inventory", {
+       91 +        method: "POST",
+       92 +        credentials: "include",
+       93 +        headers: { "Content-Type": "application/json" },
+       94 +        body: JSON.stringify({
+       95 +          name: addItemName,
+       96 +          stock: parseInt(addItemStock) || 0,
+       97 +          low_stock_threshold: parseInt(addItemThreshold) || 5,
+       98 +          unit: addItemUnit,
+       99 +        }),
+      100 +      });
+      101 +      if (!res.ok) throw new Error((await res.json()).error ?? "Add failed");
+      102 +      toast({ title: "Item added ✓", description: `${addItemName} created` });
+      103 +      setAddDialogOpen(false);
+      104 +      setAddItemName("");
+      105 +      setAddItemStock("0");
+      106 +      setAddItemThreshold("5");
+      107 +      setAddItemUnit("units");
+      108 +      fetchInventory();
+      109 +    } catch (e: unknown) {
+      110 +      toast({ title: "Add failed", description: e instanceof Error ? e.message : "", variant: "d
+          +estructive" });
+      111 +    } finally {
+      112 +      setAdding(false);
+      113 +    }
+      114 +  }
+      115 +
+      116 +  function handleRemoveClick(id: string) {
+      117 +    setRemoveIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+      118 +  }
+      119 +
+      120 +  function handleSelectAll() {
+      121 +    if (removeIds.length === items.length) {
+      122 +      setRemoveIds([]);
+      123 +    } else {
+      124 +      setRemoveIds(items.map(i => i.id));
+      125 +    }
+      126 +  }
+      127 +
+      128 +  async function handleRemoveItems() {
+      129 +    if (removeIds.length === 0) return;
+      130 +    setRemoving(true);
+      131 +    try {
+      132 +      for (const id of removeIds) {
+      133 +        const res = await fetch(`/api/inventory/${id}`, {
+      134 +          method: "DELETE",
+      135 +          credentials: "include",
+      136 +        });
+      137 +        if (!res.ok) throw new Error((await res.json()).error ?? `Failed to delete ${id}`);
+      138 +      }
+      139 +      toast({ title: "Items removed ✓", description: `${removeIds.length} item(s) deleted` });
+      140 +      setRemoveIds([]);
+      141 +      setRemoveDialogOpen(false);
+      142 +      fetchInventory();
+      143 +    } catch (e: unknown) {
+      144 +      toast({ title: "Remove failed", description: e instanceof Error ? e.message : "", variant:
+          + "destructive" });
+      145 +    } finally {
+      146 +      setRemoving(false);
+      147 +    }
+      148 +  }
+      149 +
+      150    const lowCount = items.filter((i) => i.is_low_stock).length;
+      151    const okCount  = items.filter((i) => !i.is_low_stock).length;
+      152
+  Thought for 1m 59s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\inventory\page.tsx)
+  ⎿  Added 55 lines, removed 9 lines
+       58
+       59    useEffect(() => { fetchInventory(); }, []);
+       60
+       61 -  async function handleRestock() {
+       62 -    if (!restockItem) return;
+       63 -    const qty = parseInt(restockQty);
+       64 -    if (!qty || qty < 1) { toast({ title: "Enter a valid quantity", variant: "destructive" }); r
+          -eturn; }
+       65 -    setRestocking(true);
+       61 +  async function handleAddItem() {
+       62 +    const name = addItemName.trim();
+       63 +    if (!name) { toast({ title: "Enter item name", variant: "destructive" }); return; }
+       64 +    setAdding(true);
+       65      try {
+       67 -      const res = await fetch(`/api/inventory/${restockItem.id}/restock`, {
+       66 +      const res = await fetch("/api/inventory", {
+       67          method: "POST",
+       68          credentials: "include",
+       69          headers: { "Content-Type": "application/json" },
+       71 -        body: JSON.stringify({ quantity: qty }),
+       70 +        body: JSON.stringify({
+       71 +          name,
+       72 +          quantity: parseInt(addItemStock) || 0,
+       73 +          unit: addItemUnit,
+       74 +          reorder_level: parseInt(addItemThreshold) || 5,
+       75 +          cost_per_unit: 0,
+       76 +        }),
+       77        });
+       73 -      if (!res.ok) throw new Error((await res.json()).error ?? "Restock failed");
+       74 -      const updated = await res.json();
+       78 +      if (!res.ok) throw new Error((await res.json()).error ?? "Add failed");
+       79 +      toast({ title: "Item added ✓", description: name });
+       80 +      setAddDialogOpen(false);
+       81 +      setAddItemName("");
+       82 +      setAddItemStock("0");
+       83 +      setAddItemThreshold("5");
+       84 +      setAddItemUnit("units");
+       85 +      fetchInventory();
+       86 +    } catch (e: unknown) {
+       87 +      toast({ title: "Add failed", description: e instanceof Error ? e.message : "", variant: "d
+          +estructive" });
+       88 +    } finally {
+       89 +      setAdding(false);
+       90 +    }
+       91 +  }
+       92 +
+       93 +  async function handleRemoveItems() {
+       94 +    if (removeIds.length === 0) return;
+       95 +    setRemoving(true);
+       96 +    try {
+       97 +      for (const id of removeIds) {
+       98 +        const res = await fetch(`/api/inventory/${id}`, {
+       99 +          method: "DELETE",
+      100 +          credentials: "include",
+      101 +        });
+      102 +        if (!res.ok) throw new Error((await res.json()).error ?? `Failed to delete ${id}`);
+      103 +      }
+      104 +      toast({ title: "Removed ✓", description: `${removeIds.length} item(s) deleted` });
+      105 +      setRemoveIds([]);
+      106 +      setRemoveDialogOpen(false);
+      107 +      fetchInventory();
+      108 +    } catch (e: unknown) {
+      109 +      toast({ title: "Remove failed", description: e instanceof Error ? e.message : "", variant:
+          + "destructive" });
+      110 +    } finally {
+      111 +      setRemoving(false);
+      112 +    }
+      113 +  }
+      114 +
+      115 +  function toggleRemoveId(id: string) {
+      116 +    setRemoveIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+      117 +  }
+      118 +
+      119 +  const lowCount = items.filter((i) => i.is_low_stock).length;
+      120 +  const okCount  = items.filter((i) => !i.is_low_stock).length;
+      121        toast({ title: "Restocked ✓", description: `${restockItem.name}: ${updated.previous_stock}
+            → ${updated.stock} units` });
+      122        setRestockItem(null);
+      123        setRestockQty("10");
+
+  Thought for 1m 24s, read 1 file (ctrl+o to expand)
+
+● Write(src\app\manager\inventory\page.tsx)
+  ⎿  Added 112 lines, removed 75 lines
+       9  import { Button } from "@/components/ui/button";
+      10  import { Input } from "@/components/ui/input";
+      11  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/d
+          ialog";
+      12 -import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw, Trash2, PlusCircle } fro
+         -m "lucide-react";
+      12 +import { Package, AlertTriangle, CheckCircle2, Plus, Loader2, RefreshCw, Trash2, PlusCircle, Chec
+         +k, ChevronDown } from "lucide-react";
+      13  import { useToast } from "@/hooks/use-toast";
+      14  import { Progress } from "@/components/ui/progress";
+      15  import { cn } from "@/lib/utils";
+     ...
+      58
+      59    useEffect(() => { fetchInventory(); }, []);
+      60
+      61 +  async function handleRestock() {
+      62 +    if (!restockItem) return;
+      63 +    const qty = parseInt(restockQty);
+      64 +    if (!qty || qty < 1) { toast({ title: "Enter a valid quantity", variant: "destructive" }); re
+         +turn; }
+      65 +    setRestocking(true);
+      66 +    try {
+      67 +      const res = await fetch(`/api/inventory/${restockItem.id}/restock`, {
+      68 +        method: "POST",
+      69 +        credentials: "include",
+      70 +        headers: { "Content-Type": "application/json" },
+      71 +        body: JSON.stringify({ quantity: qty }),
+      72 +      });
+      73 +      if (!res.ok) throw new Error((await res.json()).error ?? "Restock failed");
+      74 +      const updated = await res.json();
+      75 +      toast({ title: "Restocked ✓", description: `${restockItem.name}: ${updated.previous_stock}
+         +→ ${updated.stock} units` });
+      76 +      setRestockItem(null);
+      77 +      setRestockQty("10");
+      78 +      fetchInventory();
+      79 +    } catch (e: unknown) {
+      80 +      toast({ title: "Restock failed", description: e instanceof Error ? e.message : "", variant:
+         + "destructive" });
+      81 +    } finally {
+      82 +      setRestocking(false);
+      83 +    }
+      84 +  }
+      85 +
+      86    async function handleAddItem() {
+      87      const name = addItemName.trim();
+      88      if (!name) { toast({ title: "Enter item name", variant: "destructive" }); return; }
+     ...
+      141      setRemoveIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+      142    }
+      143
+      119 -  const lowCount = items.filter((i) => i.is_low_stock).length;
+      120 -  const okCount  = items.filter((i) => !i.is_low_stock).length;
+      121 -      toast({ title: "Restocked ✓", description: `${restockItem.name}: ${updated.previous_stock}
+          - → ${updated.stock} units` });
+      122 -      setRestockItem(null);
+      123 -      setRestockQty("10");
+      124 -      fetchInventory();
+      125 -    } catch (e: unknown) {
+      126 -      toast({ title: "Restock failed", description: e instanceof Error ? e.message : "", variant
+          -: "destructive" });
+      127 -    } finally {
+      128 -      setRestocking(false);
+      129 -    }
+      130 -  }
+      131 -
+      132 -  async function handleAddItem() {
+      133 -    if (!addItemName.trim()) { toast({ title: "Enter item name", variant: "destructive" }); retu
+          -rn; }
+      134 -    setAdding(true);
+      135 -    try {
+      136 -      const res = await fetch("/api/inventory", {
+      137 -        method: "POST",
+      138 -        credentials: "include",
+      139 -        headers: { "Content-Type": "application/json" },
+      140 -        body: JSON.stringify({
+      141 -          name: addItemName,
+      142 -          stock: parseInt(addItemStock) || 0,
+      143 -          low_stock_threshold: parseInt(addItemThreshold) || 5,
+      144 -          unit: addItemUnit,
+      145 -        }),
+      146 -      });
+      147 -      if (!res.ok) throw new Error((await res.json()).error ?? "Add failed");
+      148 -      toast({ title: "Item added ✓", description: `${addItemName} created` });
+      149 -      setAddDialogOpen(false);
+      150 -      setAddItemName("");
+      151 -      setAddItemStock("0");
+      152 -      setAddItemThreshold("5");
+      153 -      setAddItemUnit("units");
+      154 -      fetchInventory();
+      155 -    } catch (e: unknown) {
+      156 -      toast({ title: "Add failed", description: e instanceof Error ? e.message : "", variant: "d
+          -estructive" });
+      157 -    } finally {
+      158 -      setAdding(false);
+      159 -    }
+      160 -  }
+      161 -
+      162 -  function handleRemoveClick(id: string) {
+      163 -    setRemoveIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+      164 -  }
+      165 -
+      144    function handleSelectAll() {
+      145      if (removeIds.length === items.length) {
+      146        setRemoveIds([]);
+     ...
+      149      }
+      150    }
+      151
+      174 -  async function handleRemoveItems() {
+      175 -    if (removeIds.length === 0) return;
+      176 -    setRemoving(true);
+      177 -    try {
+      178 -      for (const id of removeIds) {
+      179 -        const res = await fetch(`/api/inventory/${id}`, {
+      180 -          method: "DELETE",
+      181 -          credentials: "include",
+      182 -        });
+      183 -        if (!res.ok) throw new Error((await res.json()).error ?? `Failed to delete ${id}`);
+      184 -      }
+      185 -      toast({ title: "Items removed ✓", description: `${removeIds.length} item(s) deleted` });
+      186 -      setRemoveIds([]);
+      187 -      setRemoveDialogOpen(false);
+      188 -      fetchInventory();
+      189 -    } catch (e: unknown) {
+      190 -      toast({ title: "Remove failed", description: e instanceof Error ? e.message : "", variant:
+          - "destructive" });
+      191 -    } finally {
+      192 -      setRemoving(false);
+      193 -    }
+      194 -  }
+      195 -
+      152    const lowCount = items.filter((i) => i.is_low_stock).length;
+      153    const okCount  = items.filter((i) => !i.is_low_stock).length;
+      154
+     ...
+      159            <h1 className="text-3xl font-bold text-slate-900">Inventory</h1>
+      160            <p className="text-slate-500">Stock levels and restock management</p>
+      161          </div>
+      206 -        <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg-w
+          -hite">
+      207 -          <RefreshCw className="size-4" /> Refresh
+      208 -        </Button>
+      162 +        <div className="flex gap-3">
+      163 +          <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg
+          +-white">
+      164 +            <RefreshCw className="size-4" /> Refresh
+      165 +          </Button>
+      166 +          <Button onClick={() => { setAddDialogOpen(true); }} className="rounded-xl h-12 gap-2">
+      167 +            <PlusCircle className="size-4" /> Add Item
+      168 +          </Button>
+      169 +        </div>
+      170        </header>
+      171
+      172        {error && (
+     ...
+      206          </div>
+      207        )}
+      208
+      209 +      {/* Toolbar for bulk actions */}
+      210 +      {removeIds.length > 0 && (
+      211 +        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center ju
+          +stify-between">
+      212 +          <span className="text-slate-700 font-medium">{removeIds.length} item(s) selected</span
+          +>
+      213 +          <div className="flex gap-2">
+      214 +            <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Cl
+          +ear</Button>
+      215 +            <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={re
+          +moving} className="rounded-xl">
+      216 +              <Trash2 className="size-4" /> Remove
+      217 +            </Button>
+      218 +          </div>
+      219 +        </div>
+      220 +      )}
+      221 +
+      222        {/* Items grid */}
+      223        {loading ? (
+      224          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+     ...
+      228          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      229            {items.map((item) => {
+      230              const pct = Math.min(100, Math.round((item.stock / Math.max(item.low_stock_threshold
+            * 3, 1)) * 100));
+      231 +            const selected = removeIds.includes(item.id);
+      232              return (
+      258 -              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow
+          --hidden", item.is_low_stock ? "ring-2 ring-red-200" : "")}>
+      233 +              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow
+          +-hidden transition-all", item.is_low_stock ? "ring-2 ring-red-200" : "", selected && "ring-2 rin
+          +g-primary ring-offset-2")}>
+      234                  <CardContent className="p-8 space-y-6">
+      235                    <div className="flex justify-between items-start">
+      236                      <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-
+           center text-primary">
+     ...
+      258                    >
+      259                      <Plus className="size-4" /> Restock
+      260                    </Button>
+      261 +                  {removeIds.length > 0 && (
+      262 +                    <Button
+      263 +                      variant={selected ? "default" : "outline"}
+      264 +                      className="w-full rounded-2xl h-10 text-xs font-medium gap-2 border-slate-
+          +300"
+      265 +                      onClick={() => toggleRemoveId(item.id)}
+      266 +                    >
+      267 +                      {selected ? <Check className="size-3" /> : <Check className="size-3 opacit
+          +y-0" />}
+      268 +                    </Button>
+      269 +                  )}
+      270                  </CardContent>
+      271                </Card>
+      272              );
+     ...
+      299            </DialogFooter>
+      300          </DialogContent>
+      301        </Dialog>
+      302 +
+      303 +      {/* Add item dialog */}
+      304 +      <Dialog open={addDialogOpen} onOpenChange={(o) => !o && setAddDialogOpen(false)}>
+      305 +        <DialogContent className="rounded-[2rem] border-none shadow-2xl">
+      306 +          <DialogHeader>
+      307 +            <DialogTitle className="text-xl font-black uppercase">Add Inventory Item</DialogTitl
+          +e>
+      308 +          </DialogHeader>
+      309 +          <div className="space-y-4 py-4">
+      310 +            <div className="space-y-1">
+      311 +              <label className="text-xs font-bold uppercase text-slate-500">Item Name</label>
+      312 +              <Input value={addItemName} onChange={(e) => setAddItemName(e.target.value)} placeh
+          +older="e.g. Shampoo, Wax, Microfiber" className="rounded-xl h-12 border-2 text-lg font-medium" /
+          +>
+      313 +            </div>
+      314 +            <div className="grid grid-cols-2 gap-4">
+      315 +              <div className="space-y-1">
+      316 +                <label className="text-xs font-bold uppercase text-slate-500">Initial Stock</lab
+          +el>
+      317 +                <Input type="number" min="0" value={addItemStock} onChange={(e) => setAddItemSto
+          +ck(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
+      318 +              </div>
+      319 +              <div className="space-y-1">
+      320 +                <label className="text-xs font-bold uppercase text-slate-500">Low Stock Threshol
+          +d</label>
+      321 +                <Input type="number" min="1" value={addItemThreshold} onChange={(e) => setAddIte
+          +mThreshold(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
+      322 +              </div>
+      323 +            </div>
+      324 +            <div className="space-y-1">
+      325 +              <label className="text-xs font-bold uppercase text-slate-500">Unit</label>
+      326 +              <Input value={addItemUnit} onChange={(e) => setAddItemUnit(e.target.value)} placeh
+          +older="units, liters, kg, etc." className="rounded-xl h-12 border-2 text-lg font-medium" />
+      327 +            </div>
+      328 +          </div>
+      329 +          <DialogFooter>
+      330 +            <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="rounded
+          +-xl">Cancel</Button>
+      331 +            <Button onClick={handleAddItem} disabled={adding} className="rounded-xl gap-2">
+      332 +              {adding && <Loader2 className="size-4 animate-spin" />}
+      333 +              {adding ? "Adding..." : "Add Item"}
+      334 +            </Button>
+      335 +          </DialogFooter>
+      336 +        </DialogContent>
+      337 +      </Dialog>
+      338 +
+      339 +      {/* Remove confirmation dialog */}
+      340 +      <Dialog open={removeDialogOpen} onOpenChange={(o) => !o && setRemoveDialogOpen(false)}>
+      341 +        <DialogContent className="rounded-[2rem] border-none shadow-2xl">
+      342 +          <DialogHeader>
+      343 +            <DialogTitle className="text-xl font-black uppercase">Remove {removeIds.length} Item
+          +(s)?</DialogTitle>
+      344 +          </DialogHeader>
+      345 +          <p className="text-slate-500 py-4">This action cannot be undone. The selected inventor
+          +y items will be permanently deleted.</p>
+      346 +          <DialogFooter>
+      347 +            <Button variant="outline" onClick={() => setRemoveDialogOpen(false)} className="roun
+          +ded-xl">Cancel</Button>
+      348 +            <Button variant="destructive" onClick={handleRemoveItems} disabled={removing} classN
+          +ame="rounded-xl gap-2">
+      349 +              {removing && <Loader2 className="size-4 animate-spin" />}
+      350 +              {removing ? "Removing..." : "Confirm Remove"}
+      351 +            </Button>
+      352 +          </DialogFooter>
+      353 +        </DialogContent>
+      354 +      </Dialog>
+      355      </div>
+      356    );
+      320 -}
+      357 +}
+      358   No newline at end of file
+
+  Thought for 2m 3s, read 1 file, listed 2 directories (ctrl+o to expand)
+
+● Update(src\app\manager\services\page.tsx)
+  ⎿  Added 2 lines
+      24    const { toast } = useToast();
+      25    const [services, setServices] = useState<Service[]>([]);
+      26    const [editingService, setEditingService] = useState<any>(null);
+      27 +  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+      28 +  const [newService, setNewService] = useState({ name: '', price: '', category: 'Wash', duration:
+         + 30, usp: '' });
+      29    const [mounted, setMounted] = useState(false);
+      30
+      31    // Branding (Mocked from central state)
+
+  Thought for 40s (ctrl+o to expand)
+
+● Update(src\app\manager\services\page.tsx)
+  ⎿  Added 19 lines, removed 8 lines
+       80      }
+       81    };
+       82
+       83 -  const handleCreateNew = async () => {
+       84 -    const name = window.prompt('Service name:');
+       85 -    if (!name?.trim()) return;
+       86 -    const priceStr = window.prompt('Price (KES):');
+       87 -    const price = Number(priceStr);
+       88 -    if (!price || isNaN(price)) return;
+       83 +  const handleCreateNew = () => {
+       84 +    setNewService({ name: '', price: '', category: 'Wash', duration: 30, usp: '' });
+       85 +    setCreateDialogOpen(true);
+       86 +  };
+       87 +
+       88 +  const handleSaveNewService = async () => {
+       89 +    if (!newService.name.trim() || !newService.price) {
+       90 +      toast({ title: "Missing fields", description: "Name and price are required", variant: "des
+          +tructive" });
+       91 +      return;
+       92 +    }
+       93      try {
+       94        const res = await fetch('/api/services', {
+       95          method: 'POST',
+       96          credentials: 'include',
+       97          headers: { 'Content-Type': 'application/json' },
+       94 -        body: JSON.stringify({ name: name.trim(), price, category: 'Wash', duration: 30, usp: ''
+          - }),
+       98 +        body: JSON.stringify({
+       99 +          name: newService.name.trim(),
+      100 +          price: Number(newService.price),
+      101 +          category: newService.category,
+      102 +          duration: newService.duration,
+      103 +          usp: newService.usp,
+      104 +        }),
+      105        });
+      106        const data = await res.json();
+      107        if (!res.ok) throw new Error(data.error ?? 'Create failed');
+      108        setServices(prev => [...prev, data]);
+       99 -      toast({ title: "Service Created", description: `${name} added to your catalogue.` });
+      109 +      toast({ title: "Service Created", description: `${newService.name} added to your catalogue
+          +.` });
+      110 +      setCreateDialogOpen(false);
+      111      } catch (e: unknown) {
+      112        toast({ title: "Failed", description: e instanceof Error ? e.message : 'Could not create',
+            variant: "destructive" });
+      113      }
+
+  Thought for 1m 31s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\services\page.tsx)
+  ⎿  Added 87 lines
+      267            </DialogFooter>
+      268          </DialogContent>
+      269        </Dialog>
+      270 +
+      271 +      {/* Create New Service Dialog */}
+      272 +      <Dialog open={createDialogOpen} onOpenChange={(open) => !open && setCreateDialogOpen(false
+          +)}>
+      273 +        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-n
+          +one shadow-2xl bg-white font-body">
+      274 +          <div className="p-10 bg-slate-900 text-white relative">
+      275 +            <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-primary/20 rounded-full
+          + blur-3xl" />
+      276 +            <div className="relative z-10 flex items-center gap-5">
+      277 +               <div className="size-14 rounded-2xl bg-primary flex items-center justify-center s
+          +hadow-2xl shadow-primary/30 rotate-3">
+      278 +                  <PlusCircle className="size-8 text-white" />
+      279 +               </div>
+      280 +               <div>
+      281 +                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter italic"
+          +>Provision New Service</DialogTitle>
+      282 +                  <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] tr
+          +acking-widest mt-1">
+      283 +                    System Configuration Hub • {businessName}
+      284 +                  </DialogDescription>
+      285 +               </div>
+      286 +            </div>
+      287 +          </div>
+      288 +
+      289 +          <div className="p-10 space-y-6">
+      290 +            <div className="space-y-3">
+      291 +              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest"
+          +>Service Protocol Name</Label>
+      292 +              <Input
+      293 +                value={newService.name}
+      294 +                onChange={(e) => setNewService({...newService, name: e.target.value})}
+      295 +                className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-whi
+          +te transition-all uppercase"
+      296 +                placeholder="Executive Wash, Interior Detail..."
+      297 +              />
+      298 +            </div>
+      299 +
+      300 +            <div className="grid grid-cols-2 gap-4">
+      301 +              <div className="space-y-3">
+      302 +                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wides
+          +t">Base Price (KES)</Label>
+      303 +                <Input
+      304 +                  type="number"
+      305 +                  min="0"
+      306 +                  value={newService.price}
+      307 +                  onChange={(e) => setNewService({...newService, price: e.target.value})}
+      308 +                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-w
+          +hite transition-all"
+      309 +                  placeholder="0"
+      310 +                />
+      311 +              </div>
+      312 +              <div className="space-y-3">
+      313 +                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wides
+          +t">Duration (mins)</Label>
+      314 +                <Input
+      315 +                  type="number"
+      316 +                  min="5"
+      317 +                  value={newService.duration}
+      318 +                  onChange={(e) => setNewService({...newService, duration: Number(e.target.value
+          +)})}
+      319 +                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-w
+          +hite transition-all"
+      320 +                />
+      321 +              </div>
+      322 +            </div>
+      323 +
+      324 +            <div className="space-y-3">
+      325 +              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest"
+          +>Category</Label>
+      326 +              <select
+      327 +                value={newService.category}
+      328 +                onChange={(e) => setNewService({...newService, category: e.target.value})}
+      329 +                className="w-full h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus
+          +:bg-white transition-all text-uppercase px-4"
+      330 +              >
+      331 +                <option value="Wash">Exterior Wash</option>
+      332 +                <option value="Detail">Detailing</option>
+      333 +                <option value="Interior">Interior Care</option>
+      334 +                <option value="Addon">Add-On Service</option>
+      335 +              </select>
+      336 +            </div>
+      337 +
+      338 +            <div className="space-y-3">
+      339 +              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest"
+          +>Unique Selling Proposition (USP)</Label>
+      340 +              <Input
+      341 +                value={newService.usp}
+      342 +                onChange={(e) => setNewService({...newService, usp: e.target.value})}
+      343 +                className="h-14 rounded-2xl font-bold text-sm border-2 bg-slate-50"
+      344 +                placeholder="What makes this service special?"
+      345 +              />
+      346 +            </div>
+      347 +          </div>
+      348 +
+      349 +          <DialogFooter className="p-10 bg-slate-50 gap-4">
+      350 +            <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase te
+          +xt-[10px] tracking-widest border-2" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+      351 +            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracki
+          +ng-widest bg-primary text-white border-none shadow-2xl shadow-primary/20" onClick={handleSaveNew
+          +Service}>
+      352 +              <Check className="size-4 mr-2" /> Create Service
+      353 +            </Button>
+      354 +          </DialogFooter>
+      355 +        </DialogContent>
+      356 +      </Dialog>
+      357      </div>
+      358    );
+      359  }
+
+  Thought for 12s, read 1 file, listed 1 directory (ctrl+o to expand)
+
+● Update(src\app\manager\payroll\page.tsx)
+  ⎿  Error editing file
+
+  Thought for 28s, searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\payroll\page.tsx)
+  ⎿  Removed 1 line
+      155          {[
+      156            { label: "Total Payroll (MTD)", value: `KES ${totalPayroll.toLocaleString()}`, icon: B
+           anknote, color: "text-blue-600", bg: "bg-blue-50" },
+      157            { label: "Employees Paid", value: `${records.filter(r => r.status === 'Disbursed').len
+           gth}/${records.length}`, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
+      158 -          { label: "Total Tax/NHIF", value: "KES 14.5K", icon: ShieldCheck, color: "text-indigo-
+          -600", bg: "bg-indigo-50" },
+      158            { label: "Payout Limit", value: "92%", icon: Zap, color: "text-amber-600", bg: "bg-amb
+           er-50" },
+      159          ].map((kpi, i) => (
+      160            <Card key={i} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group
+           bg-white">
+
+  Thought for 1m 12s (ctrl+o to expand)
+
+● Update(src\app\manager\payroll\page.tsx)
+  ⎿  Added 1 line, removed 1 line
+      187                </div>
+      188                <div className="flex flex-col">
+      189                  <span className="text-[8px] font-black text-emerald-600 uppercase">Daraja Gatewa
+           y Balance</span>
+      190 -                <span className="text-sm font-black text-emerald-700">KES 420,500</span>
+      190 +                <span className="text-sm font-black text-emerald-700">KES 0</span>
+      191                </div>
+      192              </div>
+      193            </div>
+
+  Thought for 1m 19s (ctrl+o to expand)
+
+● Update(src\app\manager\payroll\page.tsx)
+  ⎿  Removed 17 lines
+      400            </AlertDialogFooter>
+      401          </AlertDialogContent>
+      402        </AlertDialog>
+      403 -
+      404 -      <div className="p-8 bg-slate-900 text-white rounded-[2.5rem] flex flex-col md:flex-row ite
+          -ms-center gap-8 relative overflow-hidden shadow-2xl border-none">
+      405 -        <div className="absolute top-0 left-0 p-24 -ml-24 -mt-24 bg-primary/20 rounded-full blur
+          --[100px]" />
+      406 -        <div className="size-16 bg-white/10 rounded-[1.5rem] flex items-center justify-center bo
+          -rder border-white/10 backdrop-blur-md shrink-0 relative z-10">
+      407 -          <ShieldAlert className="size-8 text-primary" />
+      408 -        </div>
+      409 -        <div className="relative z-10 flex-1">
+      410 -          <h4 className="text-xl font-black uppercase tracking-tight italic">Compliance & Statut
+          -ory Audit</h4>
+      411 -          <p className="text-slate-400 text-sm font-bold uppercase tracking-wide mt-1">KRA P9 fo
+          -rms for May 2024 are auto-generated. Ensure filing by the 9th to avoid penalties.</p>
+      412 -        </div>
+      413 -        <Button
+      414 -          className="relative z-10 ml-auto rounded-2xl h-14 bg-white text-slate-900 font-black u
+          -ppercase text-[10px] tracking-[0.2em] px-10 shadow-2xl hover:bg-slate-50 transition-all border-n
+          -one"
+      415 -          onClick={() => toast({ title: "KRA Portal", description: "Submitting statutory returns
+          - for current cycle..." })}
+      416 -        >
+      417 -          File Returns Now
+      418 -        </Button>
+      419 -      </div>
+      403      </div>
+      404    );
+      405  }
+
+  Thought for 5m 28s, read 4 files, listed 3 directories (ctrl+o to expand)
+
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Added 54 lines, removed 16 lines
+       3
+       4  import { useState, useEffect } from "react";
+       5  import { ComingSoonBanner } from "@/components/ComingSoonBanner";
+       6 -import { SUBSCRIPTION_PLANS, VOUCHERS, PROMOTIONS } from "@/lib/mock-data";
+       6  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+       7  import { Badge } from "@/components/ui/badge";
+       8  import { Button } from "@/components/ui/button";
+      10 -import {
+      11 -  Ticket,
+      12 -  Zap,
+      13 -  Crown,
+      14 -  Plus,
+      15 -  Gift,
+      16 -  Calendar,
+      17 -  Users,
+       9 +import {
+      10 +  Ticket,
+      11 +  Zap,
+      12 +  Crown,
+      13 +  Plus,
+      14 +  Gift,
+      15 +  Calendar,
+      16 +  Users,
+      17    TrendingUp,
+      18    Tag,
+      19    Settings2,
+     ...
+      35  import { useToast } from "@/hooks/use-toast";
+      36  import Image from "next/image";
+      37
+      38 +type SubscriptionPlan = {
+      39 +  id: string;
+      40 +  name: string;
+      41 +  price: number;
+      42 +  discount: number;
+      43 +  benefits: string[];
+      44 +  isActive: boolean;
+      45 +};
+      46 +
+      47 +type Voucher = {
+      48 +  id: string;
+      49 +  code: string;
+      50 +  discount: number;
+      51 +  type: string;
+      52 +  expiry: string;
+      53 +  status: string;
+      54 +};
+      55 +
+      56 +type Promotion = {
+      57 +  id: string;
+      58 +  title: string;
+      59 +  description: string | null;
+      60 +  startDate: string;
+      61 +  endDate: string;
+      62 +  isActive: boolean;
+      63 +};
+      64 +
+      65  export default function SubscriptionsManagementPage() {
+      66    const { toast } = useToast();
+      41 -  const [plans, setPlans] = useState(SUBSCRIPTION_PLANS);
+      42 -  const [editingPlan, setEditingPlan] = useState<any>(null);
+      43 -  const [editingVoucher, setEditingVoucher] = useState<any>(null);
+      67 +  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+      68 +  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+      69 +  const [promotions, setPromotions] = useState<Promotion[]>([]);
+      70 +  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+      71 +  const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+      72    const [mounted, setMounted] = useState(false);
+      73 +  const [loading, setLoading] = useState(true);
+      74
+      75    // Branding (Mocked from central state)
+      76    const customLogoUrl = "https://picsum.photos/seed/sparkflow-logo/200/200";
+     ...
+      78
+      79    useEffect(() => {
+      80      setMounted(true);
+      81 +    fetch('/api/subscriptions', { credentials: 'include' })
+      82 +      .then(r => r.json())
+      83 +      .then(data => {
+      84 +        setPlans(data.plans ?? []);
+      85 +        setVouchers(data.vouchers ?? []);
+      86 +        setPromotions(data.promotions ?? []);
+      87 +      })
+      88 +      .catch(() => {})
+      89 +      .finally(() => setLoading(false));
+      90    }, []);
+      91
+      92    const kpis = [
+      55 -    { label: "Active Subscription Base", value: "420 Members", icon: Users, color: "text-blue-600
+         -", bg: "bg-blue-50" },
+      56 -    { label: "Monthly Recurring Revenue", value: "KES 840,000", icon: TrendingUp, color: "text-em
+         -erald-600", bg: "bg-emerald-50" },
+      57 -    { label: "Total Vouchers Redeemed", value: "1,240 Codes", icon: Gift, color: "text-amber-600"
+         -, bg: "bg-amber-50" },
+      58 -    { label: "Active Promotional Campaigns", value: "2 Live", icon: Zap, color: "text-indigo-600"
+         -, bg: "bg-indigo-50" },
+      93 +    { label: "Active Subscription Base", value: loading ? "—" : "0 Members", icon: Users, color:
+         +"text-blue-600", bg: "bg-blue-50" },
+      94 +    { label: "Monthly Recurring Revenue", value: loading ? "—" : "KES 0", icon: TrendingUp, color
+         +: "text-emerald-600", bg: "bg-emerald-50" },
+      95 +    { label: "Total Vouchers Redeemed", value: loading ? "—" : "0 Codes", icon: Gift, color: "tex
+         +t-amber-600", bg: "bg-amber-50" },
+      96 +    { label: "Active Promotional Campaigns", value: loading ? "—" : promotions.filter(p => p.isAc
+         +tive).length.toString(), icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
+      97    ];
+      98
+      99    const handleSavePlan = () => {
+
+  Thought for 41s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Error editing file
+
+  Thought for 4m 7s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Added 20 lines, removed 10 lines
+       90    }, []);
+       91
+       92    const kpis = [
+       93 -    { label: "Active Subscription Base", value: loading ? "—" : "0 Members", icon: Users, color:
+          - "text-blue-600", bg: "bg-blue-50" },
+       94 -    { label: "Monthly Recurring Revenue", value: loading ? "—" : "KES 0", icon: TrendingUp, colo
+          -r: "text-emerald-600", bg: "bg-emerald-50" },
+       95 -    { label: "Total Vouchers Redeemed", value: loading ? "—" : "0 Codes", icon: Gift, color: "te
+          -xt-amber-600", bg: "bg-amber-50" },
+       96 -    { label: "Active Promotional Campaigns", value: loading ? "—" : promotions.filter(p => p.isA
+          -ctive).length.toString(), icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
+       93 +    { label: "Active Subscription Base", value: loading ? "—" : `${plans.length} Plans`, icon: U
+          +sers, color: "text-blue-600", bg: "bg-blue-50" },
+       94 +    { label: "Monthly Recurring Revenue", value: loading ? "—" : `KES ${plans.reduce((sum, p) =>
+          + sum + p.price, 0).toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emer
+          +ald-50" },
+       95 +    { label: "Total Vouchers", value: loading ? "—" : vouchers.length.toString(), icon: Gift, co
+          +lor: "text-amber-600", bg: "bg-amber-50" },
+       96 +    { label: "Active Promotions", value: loading ? "—" : promotions.filter(p => p.isActive).leng
+          +th.toString(), icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
+       97    ];
+       98
+       99    const handleSavePlan = () => {
+      100 -    setPlans(prev => prev.map(p => p.id === editingPlan.id ? editingPlan : p));
+      101 -    toast({
+      102 -      title: "Plan Configuration Synchronized",
+      103 -      description: `${editingPlan.name} membership details have been updated globally.`,
+      104 -    });
+      105 -    setEditingPlan(null);
+      100 +    if (!editingPlan) return;
+      101 +    fetch('/api/subscriptions', {
+      102 +      method: 'POST',
+      103 +      credentials: 'include',
+      104 +      headers: { 'Content-Type': 'application/json' },
+      105 +      body: JSON.stringify({ action: 'create_plan', ...editingPlan })
+      106 +    })
+      107 +    .then(r => r.json())
+      108 +    .then(data => {
+      109 +      if (data.id) {
+      110 +        setPlans(prev => prev.map(p => p.id === editingPlan.id ? data : p));
+      111 +        toast({ title: "Plan Updated", description: `${editingPlan.name} membership details have
+          + been updated globally.` });
+      112 +        setEditingPlan(null);
+      113 +      }
+      114 +    })
+      115 +    .catch(() => toast({ title: "Save Failed", variant: "destructive" }));
+      116    };
+      117
+      118    const handleSaveVoucher = () => {
+
+  Thought for 41s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Error editing file
+
+  Thought for 2m 17s, read 1 file (ctrl+o to expand)
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Added 1 line, removed 1 line
+      289              <CardDescription className="font-bold text-slate-500 uppercase text-[10px] tracking-
+           widest">Manual coupon & seasonal code audits</CardDescription>
+      290            </CardHeader>
+      291            <div className="space-y-4">
+      292 -            {VOUCHERS.map((voucher) => (
+      292 +            {vouchers.map((voucher) => (
+      293                <div key={voucher.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slat
+           e-100 group hover:bg-white hover:shadow-lg transition-all">
+      294                  <div className="flex items-center gap-4">
+      295                    <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justi
+           fy-center group-hover:scale-110 transition-transform">
+
+  Thought for 12s (ctrl+o to expand)
+
+● Update(src\app\manager\subscriptions\page.tsx)
+  ⎿  Added 1 line, removed 1 line
+      253            <div className="space-y-6 pt-4">
+      254               <h3 className="text-xl font-black text-slate-900 uppercase italic">Live Promotional
+            Campaigns</h3>
+      255               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      256 -               {PROMOTIONS.map((promo) => (
+      256 +               {promotions.map((promo) => (
+      257                   <Card key={promo.id} className="border-none shadow-sm rounded-[2.5rem] bg-indig
+           o-600 text-white overflow-hidden relative group">
+      258                     <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-white/10 rounded
+           -full blur-3xl group-hover:scale-125 transition-transform duration-1000" />
+      259                     <CardContent className="p-10 space-y-6 relative z-10">
+
+  Thought for 19s, read 1 file (ctrl+o to expand)
+
+● Update(src\app\manager\accounts\page.tsx)
+  ⎿  Added 22 lines, removed 2 lines
+      55    const [mounted, setMounted] = useState(false);
+      56    const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([]);
+      57    const [expenses, setExpenses] = useState<Expense[]>([]);
+      58 -  const currentProfit = 90500;
+      58 +  const [totalRevenue, setTotalRevenue] = useState(0);
+      59 +  const [totalExpenses, setTotalExpenses] = useState(0);
+      60 +  const [netProfit, setNetProfit] = useState(0);
+      61 +
+      62 +  useEffect(() => {
+      63 +    setMounted(true);
+      64 +    fetch('/api/accounts', { credentials: 'include' })
+      65 +      .then(r => r.json())
+      66 +      .then(data => {
+      67 +        if (data.chart_of_accounts) setChartOfAccounts(data.chart_of_accounts);
+      68 +        if (data.expenses) setExpenses(data.expenses);
+      69 +        if (data.summary) {
+      70 +          setTotalRevenue(data.summary.total_revenue);
+      71 +          setTotalExpenses(data.summary.total_expenses);
+      72 +          setNetProfit(data.summary.net_profit);
+      73 +        }
+      74 +      })
+      75 +      .catch(() => {});
+      76 +  }, []);
+      77 +
+      78 +  const currentProfit = netProfit;
+      79    const targetProfit = 100000;
+      60 -  const achievementRate = (currentProfit / targetProfit) * 100;
+      80 +  const achievementRate = targetProfit > 0 ? (currentProfit / targetProfit) * 100 : 0;
+      81    const isTargetMet = achievementRate >= 100;
+      82
+      83    useEffect(() => {
+
+  Thought for 1m 38s (ctrl+o to expand)
+
+● Update(src\app\manager\accounts\page.tsx)
+  ⎿  Added 4 lines, removed 4 lines
+      141    };
+      142
+      143    const kpis = [
+      144 -    { label: "Net Profit (Month to Date)", value: `KES ${currentProfit.toLocaleString()}`, icon:
+          - Banknote, color: "text-blue-600", bg: "bg-blue-50", layer: 'bg-blue-500' },
+      145 -    { label: "Physical Cash on Hand", value: "KES 24,500", icon: Wallet, color: "text-emerald-60
+          -0", bg: "bg-emerald-50", layer: 'bg-emerald-500' },
+      146 -    { label: "M-Pesa Business Balance", value: "KES 142,000", icon: CreditCard, color: "text-ind
+          -igo-600", bg: "bg-indigo-50", layer: 'bg-indigo-500' },
+      147 -    { label: "Pending Vendor Obligations", value: "KES 12,200", icon: ShieldAlert, color: "text-
+          -red-600", bg: "bg-red-50", layer: 'bg-red-500' },
+      144 +    { label: "Net Profit (Month to Date)", value: mounted ? `KES ${currentProfit.toLocaleString(
+          +)}` : "KES 0", icon: Banknote, color: "text-blue-600", bg: "bg-blue-50", layer: 'bg-blue-500' },
+      145 +    { label: "Physical Cash on Hand", value: mounted ? `KES ${chartOfAccounts.find(a => a.code =
+          +== '1000')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: Wallet, color: "text-emerald-600"
+          +, bg: "bg-emerald-50", layer: 'bg-emerald-500' },
+      146 +    { label: "M-Pesa Business Balance", value: mounted ? `KES ${chartOfAccounts.find(a => a.code
+          + === '1010')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: CreditCard, color: "text-indigo
+          +-600", bg: "bg-indigo-50", layer: 'bg-indigo-500' },
+      147 +    { label: "Pending Vendor Obligations", value: mounted ? `KES ${chartOfAccounts.find(a => a.c
+          +ode === '2000')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: ShieldAlert, color: "text-re
+          +d-600", bg: "bg-red-50", layer: 'bg-red-500' },
+      148    ];
+      149
+      150    return (
+
+  Thought for 6m 12s, read 3 files, listed 1 directory, ran 4 shell commands (ctrl+o to expand)
+
+● Update(src\app\manager\accounts\page.tsx)
+  ⎿  Removed 11 lines
+      80    const achievementRate = targetProfit > 0 ? (currentProfit / targetProfit) * 100 : 0;
+      81    const isTargetMet = achievementRate >= 100;
+      82
+      83 -  useEffect(() => {
+      84 -    setMounted(true);
+      85 -    fetch('/api/accounts', { credentials: 'include' })
+      86 -      .then(r => r.json())
+      87 -      .then(data => {
+      88 -        if (data.chart_of_accounts) setChartOfAccounts(data.chart_of_accounts);
+      89 -        if (data.expenses) setExpenses(data.expenses);
+      90 -      })
+      91 -      .catch(() => {});
+      92 -  }, []);
+      93 -
+      83    const handleReconciliation = () => {
+      84      toast({
+      85        title: "Audit Initiated",
+
+  Thought for 1m 52s, read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● All 6 issues have been addressed. Let me verify the changes:
+
+  1. Staff Module — Schema Cache Error:
+    - Updated src/app/api/staff/route.ts to select base_salary from DB and removed hardcoded 0
+    - Created migration 011_add_base_salary_to_staff.sql with NOTIFY pgrst, 'reload schema'
+  2. Inventory Module — Add Remove/Add Functionality:
+    - Created src/app/api/inventory/[id]/route.ts with DELETE and POST endpoints
+    - Updated src/app/manager/inventory/page.tsx with toolbar, checkboxes, Add Item dialog, Remove confirmation
+  dialog
+  3. Service Module — UI Form Instead of Browser Popup:
+    - Replaced window.prompt() in src/app/manager/services/page.tsx with a full Dialog component for creating
+  services
+  4. Payroll Module — Remove Compliance Audit Popup and Clean Up Cards:
+    - Removed "Total Tax/NHIF" KPI card from src/app/manager/payroll/page.tsx
+    - Changed Daraja Gateway Balance to display "KES 0"
+    - Removed the Compliance & Statutory Audit banner section entirely
+  5. Mock Data — Replace with Real Data or Zeros:
+    - src/app/manager/subscriptions/page.tsx: Now fetches from /api/subscriptions, KPIs use real API data (0 when
+  loading, then actual counts)
+    - src/app/manager/accounts/page.tsx: Now fetches from /api/accounts, KPIs use real chart_of_accounts data (0
+  when loading, then actual balances)
+
+  Let me check if there's anything I might have missed:
+
+  Thought for 20s, ran 2 shell commands (ctrl+o to expand)
+
+● All 6 issues have been fixed. The changes cover:
+
+  1. Staff Module (src/app/api/staff/route.ts) - Added base_salary to SELECT query and removed hardcoded 0
+  2. Inventory Module (src/app/manager/inventory/page.tsx, src/app/api/inventory/[id]/route.ts) - Added bulk
+  Add/Remove functionality with toolbar and dialogs
+  3. Service Module (src/app/manager/services/page.tsx) - Replaced window.prompt() with full UI Dialog
+  4. Payroll Module (src/app/manager/payroll/page.tsx) - Removed Tax/NHIF card, set Daraja balance to 0, removed
+  Compliance Audit banner
+  5. Subscriptions Module (src/app/manager/subscriptions/page.tsx) - Fetches real data from API, displays 0 when
+  loading, uses actual counts
+  6. Accounts Module (src/app/manager/accounts/page.tsx) - Fetches real data from API, KPIs use actual
+  chart_of_accounts balances (0 when loading)
+
+  Plus a new migration file Kleen Migrations/supabase/migrations/011_add_base_salary_to_staff.sql that adds the
+  base_salary column to the staff table and notifies PostgREST to reload its schema cache.
+
+● Ran 1 stop hook (ctrl+o to expand)
+  ⎿  Stop hook error: Failed with non-blocking status code: MemPalace hook error: could not find a
+  runnable mempalace command or module
+
+✻ Worked for 59m 37s

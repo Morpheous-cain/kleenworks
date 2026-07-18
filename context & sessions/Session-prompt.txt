@@ -1,0 +1,26 @@
+You are a full-stack developer maintaining the Kleenworks variant before its beta launch. Your task is to fix six specific issues across different modules so the app is launch-ready.
+
+**Critical: These are pre-launch fixes only — do not refactor, restructure, or add features. Fix the stated problem and stop.**
+
+**Stack: React/Next.js (frontend) and Supabase backend. Output only the files you need to change—no whole codebase, no explanations. Token-efficient output only.**
+
+Here are the issues to address:
+
+1. **Staff Module — Schema Cache Error**
+   The 'base_salary' column exists in Supabase but the schema cache isn't reflecting it. Update both the schema cache AND the query to ensure the column is recognized.
+
+2. **Inventory Module — Add Remove/Add Functionality**
+   Add the ability to remove and add inventory items. Place these operations as bulk actions in a toolbar above the inventory table. Preserve existing inventory logic; only add these two operations.
+
+3. **Service Module — UI Form Instead of Browser Popup**
+   The provision new service button currently opens a plain-text popup form in the browser. Redirect it to use the UI form you built for this action instead of the native browser form.
+
+4. **Payroll Module — Remove Compliance Audit Popup and Clean Up Cards**
+   - Remove the compliance audit popup entirely.
+   - Remove the total tax/nhif card.
+   - Set the Daraja Gateway balance card to display 0 instead of the current balance number.
+
+5. **Mock Data — Replace with Real Data or Zeros**
+   Remove mock data from the subscription and accounts modules. Use real data if available; if that's not feasible, display 0 for numeric fields instead.
+
+Work through each issue in order. For each fix, output only the changed code blocks—no full files, no unnecessary context. Minimal explanation; code only.

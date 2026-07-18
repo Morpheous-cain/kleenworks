@@ -55,10 +55,9 @@ export default function AccountsManagementPage() {
   const [mounted, setMounted] = useState(false);
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const currentProfit = 90500;
-  const targetProfit = 100000;
-  const achievementRate = (currentProfit / targetProfit) * 100;
-  const isTargetMet = achievementRate >= 100;
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [netProfit, setNetProfit] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -67,9 +66,19 @@ export default function AccountsManagementPage() {
       .then(data => {
         if (data.chart_of_accounts) setChartOfAccounts(data.chart_of_accounts);
         if (data.expenses) setExpenses(data.expenses);
+        if (data.summary) {
+          setTotalRevenue(data.summary.total_revenue);
+          setTotalExpenses(data.summary.total_expenses);
+          setNetProfit(data.summary.net_profit);
+        }
       })
       .catch(() => {});
   }, []);
+
+  const currentProfit = netProfit;
+  const targetProfit = 100000;
+  const achievementRate = targetProfit > 0 ? (currentProfit / targetProfit) * 100 : 0;
+  const isTargetMet = achievementRate >= 100;
 
   const handleReconciliation = () => {
     toast({
@@ -121,10 +130,10 @@ export default function AccountsManagementPage() {
   };
 
   const kpis = [
-    { label: "Net Profit (Month to Date)", value: `KES ${currentProfit.toLocaleString()}`, icon: Banknote, color: "text-blue-600", bg: "bg-blue-50", layer: 'bg-blue-500' },
-    { label: "Physical Cash on Hand", value: "KES 24,500", icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50", layer: 'bg-emerald-500' },
-    { label: "M-Pesa Business Balance", value: "KES 142,000", icon: CreditCard, color: "text-indigo-600", bg: "bg-indigo-50", layer: 'bg-indigo-500' },
-    { label: "Pending Vendor Obligations", value: "KES 12,200", icon: ShieldAlert, color: "text-red-600", bg: "bg-red-50", layer: 'bg-red-500' },
+    { label: "Net Profit (Month to Date)", value: mounted ? `KES ${currentProfit.toLocaleString()}` : "KES 0", icon: Banknote, color: "text-blue-600", bg: "bg-blue-50", layer: 'bg-blue-500' },
+    { label: "Physical Cash on Hand", value: mounted ? `KES ${chartOfAccounts.find(a => a.code === '1000')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50", layer: 'bg-emerald-500' },
+    { label: "M-Pesa Business Balance", value: mounted ? `KES ${chartOfAccounts.find(a => a.code === '1010')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: CreditCard, color: "text-indigo-600", bg: "bg-indigo-50", layer: 'bg-indigo-500' },
+    { label: "Pending Vendor Obligations", value: mounted ? `KES ${chartOfAccounts.find(a => a.code === '2000')?.balance.toLocaleString() ?? '0'}` : "KES 0", icon: ShieldAlert, color: "text-red-600", bg: "bg-red-50", layer: 'bg-red-500' },
   ];
 
   return (

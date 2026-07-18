@@ -24,6 +24,8 @@ export default function ServicesPage() {
   const { toast } = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [editingService, setEditingService] = useState<any>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newService, setNewService] = useState({ name: '', price: '', category: 'Wash', duration: 30, usp: '' });
   const [mounted, setMounted] = useState(false);
 
   // Branding (Mocked from central state)
@@ -78,23 +80,34 @@ export default function ServicesPage() {
     }
   };
 
-  const handleCreateNew = async () => {
-    const name = window.prompt('Service name:');
-    if (!name?.trim()) return;
-    const priceStr = window.prompt('Price (KES):');
-    const price = Number(priceStr);
-    if (!price || isNaN(price)) return;
+  const handleCreateNew = () => {
+    setNewService({ name: '', price: '', category: 'Wash', duration: 30, usp: '' });
+    setCreateDialogOpen(true);
+  };
+
+  const handleSaveNewService = async () => {
+    if (!newService.name.trim() || !newService.price) {
+      toast({ title: "Missing fields", description: "Name and price are required", variant: "destructive" });
+      return;
+    }
     try {
       const res = await fetch('/api/services', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), price, category: 'Wash', duration: 30, usp: '' }),
+        body: JSON.stringify({
+          name: newService.name.trim(),
+          price: Number(newService.price),
+          category: newService.category,
+          duration: newService.duration,
+          usp: newService.usp,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Create failed');
       setServices(prev => [...prev, data]);
-      toast({ title: "Service Created", description: `${name} added to your catalogue.` });
+      toast({ title: "Service Created", description: `${newService.name} added to your catalogue.` });
+      setCreateDialogOpen(false);
     } catch (e: unknown) {
       toast({ title: "Failed", description: e instanceof Error ? e.message : 'Could not create', variant: "destructive" });
     }
@@ -250,6 +263,93 @@ export default function ServicesPage() {
             <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase text-[10px] tracking-widest border-2" onClick={() => setEditingService(null)}>Discard</Button>
             <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-slate-900 text-white border-none shadow-2xl shadow-slate-900/20" onClick={handleSaveService}>
               <Check className="size-4 mr-2" /> Commit Node Updates
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create New Service Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={(open) => !open && setCreateDialogOpen(false)}>
+        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white font-body">
+          <div className="p-10 bg-slate-900 text-white relative">
+            <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-primary/20 rounded-full blur-3xl" />
+            <div className="relative z-10 flex items-center gap-5">
+               <div className="size-14 rounded-2xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 rotate-3">
+                  <PlusCircle className="size-8 text-white" />
+               </div>
+               <div>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter italic">Provision New Service</DialogTitle>
+                  <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">
+                    System Configuration Hub • {businessName}
+                  </DialogDescription>
+               </div>
+            </div>
+          </div>
+
+          <div className="p-10 space-y-6">
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Service Protocol Name</Label>
+              <Input
+                value={newService.name}
+                onChange={(e) => setNewService({...newService, name: e.target.value})}
+                className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all uppercase"
+                placeholder="Executive Wash, Interior Detail..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Base Price (KES)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={newService.price}
+                  onChange={(e) => setNewService({...newService, price: e.target.value})}
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all"
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Duration (mins)</Label>
+                <Input
+                  type="number"
+                  min="5"
+                  value={newService.duration}
+                  onChange={(e) => setNewService({...newService, duration: Number(e.target.value)})}
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Category</Label>
+              <select
+                value={newService.category}
+                onChange={(e) => setNewService({...newService, category: e.target.value})}
+                className="w-full h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all text-uppercase px-4"
+              >
+                <option value="Wash">Exterior Wash</option>
+                <option value="Detail">Detailing</option>
+                <option value="Interior">Interior Care</option>
+                <option value="Addon">Add-On Service</option>
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Unique Selling Proposition (USP)</Label>
+              <Input
+                value={newService.usp}
+                onChange={(e) => setNewService({...newService, usp: e.target.value})}
+                className="h-14 rounded-2xl font-bold text-sm border-2 bg-slate-50"
+                placeholder="What makes this service special?"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="p-10 bg-slate-50 gap-4">
+            <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase text-[10px] tracking-widest border-2" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-primary text-white border-none shadow-2xl shadow-primary/20" onClick={handleSaveNewService}>
+              <Check className="size-4 mr-2" /> Create Service
             </Button>
           </DialogFooter>
         </DialogContent>

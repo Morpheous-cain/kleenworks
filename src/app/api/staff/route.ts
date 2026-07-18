@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient()
   let query = supabase
     .from('staff')
-    .select('id, name, role, branch_id, performance, rating, attendance_status, points, created_at')
+    .select('id, name, role, branch_id, performance, rating, attendance_status, points, created_at, base_salary')
     .eq('tenant_id', ctx.tenantId)
     .order('name')
 
@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
   const normalised = (data ?? []).map((s: any) => ({
     ...s,
     email: null,
-    base_salary: 0,
   }))
 
   return NextResponse.json(normalised)

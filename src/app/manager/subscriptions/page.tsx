@@ -3,18 +3,17 @@
 
 import { useState, useEffect } from "react";
 import { ComingSoonBanner } from "@/components/ComingSoonBanner";
-import { SUBSCRIPTION_PLANS, VOUCHERS, PROMOTIONS } from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Ticket, 
-  Zap, 
-  Crown, 
-  Plus, 
-  Gift, 
-  Calendar, 
-  Users, 
+import {
+  Ticket,
+  Zap,
+  Crown,
+  Plus,
+  Gift,
+  Calendar,
+  Users,
   TrendingUp,
   Tag,
   Settings2,
@@ -36,12 +35,42 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
+type SubscriptionPlan = {
+  id: string;
+  name: string;
+  price: number;
+  discount: number;
+  benefits: string[];
+  isActive: boolean;
+};
+
+type Voucher = {
+  id: string;
+  code: string;
+  discount: number;
+  type: string;
+  expiry: string;
+  status: string;
+};
+
+type Promotion = {
+  id: string;
+  title: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+};
+
 export default function SubscriptionsManagementPage() {
   const { toast } = useToast();
-  const [plans, setPlans] = useState(SUBSCRIPTION_PLANS);
-  const [editingPlan, setEditingPlan] = useState<any>(null);
-  const [editingVoucher, setEditingVoucher] = useState<any>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Branding (Mocked from central state)
   const customLogoUrl = "https://picsum.photos/seed/sparkflow-logo/200/200";
@@ -49,22 +78,41 @@ export default function SubscriptionsManagementPage() {
 
   useEffect(() => {
     setMounted(true);
+    fetch('/api/subscriptions', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        setPlans(data.plans ?? []);
+        setVouchers(data.vouchers ?? []);
+        setPromotions(data.promotions ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const kpis = [
-    { label: "Active Subscription Base", value: "420 Members", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Monthly Recurring Revenue", value: "KES 840,000", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "Total Vouchers Redeemed", value: "1,240 Codes", icon: Gift, color: "text-amber-600", bg: "bg-amber-50" },
-    { label: "Active Promotional Campaigns", value: "2 Live", icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: "Active Subscription Base", value: loading ? "—" : `${plans.length} Plans`, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Monthly Recurring Revenue", value: loading ? "—" : `KES ${plans.reduce((sum, p) => sum + p.price, 0).toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "Total Vouchers", value: loading ? "—" : vouchers.length.toString(), icon: Gift, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "Active Promotions", value: loading ? "—" : promotions.filter(p => p.isActive).length.toString(), icon: Zap, color: "text-indigo-600", bg: "bg-indigo-50" },
   ];
 
   const handleSavePlan = () => {
-    setPlans(prev => prev.map(p => p.id === editingPlan.id ? editingPlan : p));
-    toast({
-      title: "Plan Configuration Synchronized",
-      description: `${editingPlan.name} membership details have been updated globally.`,
-    });
-    setEditingPlan(null);
+    if (!editingPlan) return;
+    fetch('/api/subscriptions', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create_plan', ...editingPlan })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.id) {
+        setPlans(prev => prev.map(p => p.id === editingPlan.id ? data : p));
+        toast({ title: "Plan Updated", description: `${editingPlan.name} membership details have been updated globally.` });
+        setEditingPlan(null);
+      }
+    })
+    .catch(() => toast({ title: "Save Failed", variant: "destructive" }));
   };
 
   const handleSaveVoucher = () => {
@@ -205,7 +253,7 @@ export default function SubscriptionsManagementPage() {
           <div className="space-y-6 pt-4">
              <h3 className="text-xl font-black text-slate-900 uppercase italic">Live Promotional Campaigns</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               {PROMOTIONS.map((promo) => (
+               {promotions.map((promo) => (
                  <Card key={promo.id} className="border-none shadow-sm rounded-[2.5rem] bg-indigo-600 text-white overflow-hidden relative group">
                    <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000" />
                    <CardContent className="p-10 space-y-6 relative z-10">
@@ -241,7 +289,7 @@ export default function SubscriptionsManagementPage() {
             <CardDescription className="font-bold text-slate-500 uppercase text-[10px] tracking-widest">Manual coupon & seasonal code audits</CardDescription>
           </CardHeader>
           <div className="space-y-4">
-            {VOUCHERS.map((voucher) => (
+            {vouchers.map((voucher) => (
               <div key={voucher.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                 <div className="flex items-center gap-4">
                   <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
