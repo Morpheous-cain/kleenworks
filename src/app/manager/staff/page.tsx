@@ -78,13 +78,13 @@ const ROLE_OPTIONS = ["manager", "agent", "attendant"]
 function attendanceBadgeClass(status: string | null) {
   switch (status) {
     case "present":
-      return "bg-emerald-100 text-emerald-700"
+      return "bg-emerald-500/10 text-emerald-600"
     case "absent":
-      return "bg-red-100 text-red-700"
+      return "bg-destructive/10 text-destructive"
     case "on_leave":
-      return "bg-amber-100 text-amber-700"
+      return "bg-amber-500/10 text-amber-600"
     default:
-      return "bg-slate-100 text-slate-500"
+      return "bg-muted text-muted-foreground"
   }
 }
 
@@ -249,14 +249,14 @@ export default function StaffPage() {
     return (
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="h-8 w-32 bg-slate-100 rounded-xl animate-pulse" />
-          <div className="h-10 w-36 bg-slate-100 rounded-xl animate-pulse" />
+          <div className="h-8 w-32 bg-muted rounded-xl animate-pulse" />
+          <div className="h-10 w-36 bg-muted rounded-xl animate-pulse" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="h-36 bg-slate-100 rounded-3xl animate-pulse"
+              className="h-36 bg-muted rounded-3xl animate-pulse"
             />
           ))}
         </div>
@@ -268,8 +268,8 @@ export default function StaffPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border-2 border-dashed border-red-200 rounded-3xl p-6">
-          <p className="text-red-700 font-bold mb-3">{error}</p>
+        <div className="bg-destructive/10 border-2 border-dashed border-destructive/20 rounded-3xl p-6">
+          <p className="text-destructive font-bold mb-3">{error}</p>
           <Button variant="outline" onClick={fetchStaff}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Retry

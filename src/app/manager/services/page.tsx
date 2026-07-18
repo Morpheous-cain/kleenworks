@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import type { Service } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Tag, Wrench, Plus, Star, Zap, Gauge, Check, Settings2, Trash2 } from "lucide-react";
+import { Clock, Tag, Wrench, Plus, PlusCircle, Star, Zap, Gauge, Check, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -116,7 +116,7 @@ export default function ServicesPage() {
   if (!mounted) return null;
 
   return (
-    <div className="p-8 space-y-8 bg-[#f8fafc] min-h-screen font-body">
+    <div className="p-8 space-y-8 bg-background min-h-screen font-body">
       <header className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="size-14 rounded-2xl bg-white shadow-xl flex items-center justify-center overflow-hidden border-2 border-primary/10 relative">
@@ -138,19 +138,19 @@ export default function ServicesPage() {
       {/* KPI Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpis.map((kpi, i) => (
-          <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden group bg-white">
+          <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden group bg-card">
             <CardContent className="p-8">
               <div className="flex justify-between items-start mb-6">
-                <div className={`size-12 ${kpi.bg} ${kpi.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <div className={cn(`size-12 ${kpi.bg} ${kpi.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`)}>
                   <kpi.icon className="size-6" />
                 </div>
-                <Badge className="bg-slate-100 border-none font-black text-[8px] uppercase tracking-widest rounded-full px-3 py-1">
+                <Badge className="bg-muted text-muted-foreground border-none font-black text-[8px] uppercase tracking-widest rounded-full px-3 py-1">
                   {kpi.trend}
                 </Badge>
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{kpi.label}</span>
-                <div className="text-3xl font-black text-slate-900 tracking-tighter leading-none">{kpi.value}</div>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{kpi.label}</span>
+                <div className="text-3xl font-black text-foreground tracking-tighter leading-none">{kpi.value}</div>
               </div>
             </CardContent>
           </Card>
@@ -159,18 +159,18 @@ export default function ServicesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service) => (
-          <Card key={service.id} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group bg-white hover:shadow-2xl transition-all duration-500">
+          <Card key={service.id} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group bg-card hover:shadow-2xl transition-all duration-500">
             <div className="p-10 space-y-8">
               <div className="flex justify-between items-start">
                 <div className="size-16 bg-primary/10 rounded-[1.5rem] text-primary flex items-center justify-center group-hover:rotate-6 transition-transform shadow-inner">
                   <Wrench className="size-8" />
                 </div>
-                <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1">{service.category}</Badge>
+                <Badge className="bg-muted text-muted-foreground border-none font-black text-[9px] uppercase tracking-widest px-3 py-1">{service.category}</Badge>
               </div>
-              
+
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tight">{service.name}</h3>
-                <div className="flex items-center gap-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                <h3 className="text-2xl font-black text-foreground uppercase italic tracking-tight">{service.name}</h3>
+                <div className="flex items-center gap-4 text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2">
                     <Clock className="size-3.5" />
                     <span>{service.duration} mins</span>
@@ -182,14 +182,14 @@ export default function ServicesPage() {
                 </div>
               </div>
 
-              <div className="flex items-end justify-between pt-6 border-t border-dashed border-slate-100">
+              <div className="flex items-end justify-between pt-6 border-t border-dashed border-border">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest opacity-60">Base Listing Price</span>
-                  <span className="text-3xl font-black text-slate-900 italic tracking-tighter leading-none">KES {service.price.toLocaleString()}</span>
+                  <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">Base Listing Price</span>
+                  <span className="text-3xl font-black text-foreground italic tracking-tighter leading-none">KES {service.price.toLocaleString()}</span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="rounded-2xl h-12 px-6 font-black uppercase text-[10px] tracking-widest border-2 border-slate-100 hover:bg-slate-50 transition-all gap-2"
+                <Button
+                  variant="outline"
+                  className="rounded-2xl h-12 px-6 font-black uppercase text-[10px] tracking-widest border-2 border-border hover:bg-muted transition-all gap-2"
                   onClick={() => setEditingService(service)}
                 >
                   <Settings2 className="size-3.5" /> Configure
@@ -202,7 +202,7 @@ export default function ServicesPage() {
 
       {/* Branded Service Editor */}
       <Dialog open={!!editingService} onOpenChange={(open) => !open && setEditingService(null)}>
-        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white font-body">
+        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-card font-body">
           <div className="p-10 bg-slate-900 text-white relative">
             <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-primary/20 rounded-full blur-3xl" />
             <div className="relative z-10 flex items-center gap-5">
@@ -217,51 +217,51 @@ export default function ServicesPage() {
                </div>
             </div>
           </div>
-          
+
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Service Protocol Name</Label>
-              <Input 
-                value={editingService?.name} 
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Service Protocol Name</Label>
+              <Input
+                value={editingService?.name}
                 onChange={(e) => setEditingService({...editingService, name: e.target.value})}
-                className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all uppercase" 
+                className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all uppercase"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Listing Price (KES)</Label>
-                <Input 
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Listing Price (KES)</Label>
+                <Input
                   type="number"
-                  value={editingService?.price} 
+                  value={editingService?.price}
                   onChange={(e) => setEditingService({...editingService, price: Number(e.target.value)})}
-                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 text-center" 
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 text-center"
                 />
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Est. Duration (Mins)</Label>
-                <Input 
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Est. Duration (Mins)</Label>
+                <Input
                   type="number"
-                  value={editingService?.duration} 
+                  value={editingService?.duration}
                   onChange={(e) => setEditingService({...editingService, duration: Number(e.target.value)})}
-                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 text-center" 
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 text-center"
                 />
               </div>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Unique Selling Proposition (USP)</Label>
-              <Input 
-                value={editingService?.usp} 
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Unique Selling Proposition (USP)</Label>
+              <Input
+                value={editingService?.usp}
                 onChange={(e) => setEditingService({...editingService, usp: e.target.value})}
-                className="h-14 rounded-2xl font-bold text-sm border-2 bg-slate-50" 
+                className="h-14 rounded-2xl font-bold text-sm border-2 bg-muted/50"
               />
             </div>
           </div>
 
-          <DialogFooter className="p-10 bg-slate-50 gap-4">
+          <DialogFooter className="p-10 bg-muted/50 gap-4">
             <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase text-[10px] tracking-widest border-2" onClick={() => setEditingService(null)}>Discard</Button>
-            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-slate-900 text-white border-none shadow-2xl shadow-slate-900/20" onClick={handleSaveService}>
+            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-foreground text-background border-none shadow-2xl shadow-foreground/20" onClick={handleSaveService}>
               <Check className="size-4 mr-2" /> Commit Node Updates
             </Button>
           </DialogFooter>
@@ -270,7 +270,7 @@ export default function ServicesPage() {
 
       {/* Create New Service Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={(open) => !open && setCreateDialogOpen(false)}>
-        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white font-body">
+        <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-card font-body">
           <div className="p-10 bg-slate-900 text-white relative">
             <div className="absolute top-0 right-0 p-16 -mr-16 -mt-16 bg-primary/20 rounded-full blur-3xl" />
             <div className="relative z-10 flex items-center gap-5">
@@ -288,45 +288,45 @@ export default function ServicesPage() {
 
           <div className="p-10 space-y-6">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Service Protocol Name</Label>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Service Protocol Name</Label>
               <Input
                 value={newService.name}
                 onChange={(e) => setNewService({...newService, name: e.target.value})}
-                className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all uppercase"
+                className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all uppercase"
                 placeholder="Executive Wash, Interior Detail..."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Base Price (KES)</Label>
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Base Price (KES)</Label>
                 <Input
                   type="number"
                   min="0"
                   value={newService.price}
                   onChange={(e) => setNewService({...newService, price: e.target.value})}
-                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all"
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all"
                   placeholder="0"
                 />
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Duration (mins)</Label>
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Duration (mins)</Label>
                 <Input
                   type="number"
                   min="5"
                   value={newService.duration}
                   onChange={(e) => setNewService({...newService, duration: Number(e.target.value)})}
-                  className="h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all"
+                  className="h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all"
                 />
               </div>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Category</Label>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Category</Label>
               <select
                 value={newService.category}
                 onChange={(e) => setNewService({...newService, category: e.target.value})}
-                className="w-full h-14 rounded-2xl font-black text-lg border-2 bg-slate-50 focus:bg-white transition-all text-uppercase px-4"
+                className="w-full h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all text-uppercase px-4"
               >
                 <option value="Wash">Exterior Wash</option>
                 <option value="Detail">Detailing</option>
@@ -336,19 +336,19 @@ export default function ServicesPage() {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Unique Selling Proposition (USP)</Label>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Unique Selling Proposition (USP)</Label>
               <Input
                 value={newService.usp}
                 onChange={(e) => setNewService({...newService, usp: e.target.value})}
-                className="h-14 rounded-2xl font-bold text-sm border-2 bg-slate-50"
+                className="h-14 rounded-2xl font-bold text-sm border-2 bg-muted/50"
                 placeholder="What makes this service special?"
               />
             </div>
           </div>
 
-          <DialogFooter className="p-10 bg-slate-50 gap-4">
+          <DialogFooter className="p-10 bg-muted/50 gap-4">
             <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase text-[10px] tracking-widest border-2" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-primary text-white border-none shadow-2xl shadow-primary/20" onClick={handleSaveNewService}>
+            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-[10px] tracking-widest bg-primary text-primary-foreground border-none shadow-2xl shadow-primary/20" onClick={handleSaveNewService}>
               <Check className="size-4 mr-2" /> Create Service
             </Button>
           </DialogFooter>

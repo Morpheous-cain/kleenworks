@@ -89,7 +89,7 @@ export function Sidebar({ onSignOut, userEmail }: SidebarProps) {
       <aside
         className={cn(
           // Base
-          'relative flex flex-col h-screen bg-[#0F1F3D] transition-all duration-300 ease-in-out shrink-0',
+          'relative flex flex-col h-screen bg-slate-900 transition-all duration-300 ease-in-out shrink-0',
           // Width
           collapsed ? 'w-[64px]' : 'w-[200px]',
           // Subtle right border
@@ -266,7 +266,7 @@ export function Sidebar({ onSignOut, userEmail }: SidebarProps) {
           onClick={() => setCollapsed(c => !c)}
           className={cn(
             'absolute -right-3 top-[72px]',
-            'size-6 rounded-full bg-[#0F1F3D] border border-white/10',
+            'size-6 rounded-full bg-slate-900 border border-white/10',
             'flex items-center justify-center',
             'text-white/50 hover:text-white hover:border-white/30',
             'transition-colors duration-150 shadow-md',
@@ -302,19 +302,19 @@ function NavItem({ label, href, icon: Icon, active, collapsed }: NavItemProps) {
             'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group relative',
             collapsed && 'justify-center px-0',
             active
-              ? 'bg-[#00A8CC]/15 text-[#00A8CC]'
+              ? 'bg-primary/15 text-primary'
               : 'text-white/50 hover:text-white hover:bg-white/5'
           )}
         >
           {/* Active indicator bar */}
           {active && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#00A8CC] rounded-full" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-full" />
           )}
 
           <Icon
             className={cn(
               'size-4 shrink-0 transition-colors',
-              active ? 'text-[#00A8CC]' : 'text-white/40 group-hover:text-white'
+              active ? 'text-primary' : 'text-white/40 group-hover:text-white'
             )}
           />
 
@@ -322,7 +322,7 @@ function NavItem({ label, href, icon: Icon, active, collapsed }: NavItemProps) {
             <span
               className={cn(
                 'text-[10px] font-black uppercase tracking-[0.12em] leading-none transition-colors',
-                active ? 'text-[#00A8CC]' : 'text-white/50 group-hover:text-white'
+                active ? 'text-primary' : 'text-white/50 group-hover:text-white'
               )}
             >
               {label}

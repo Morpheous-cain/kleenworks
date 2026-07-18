@@ -153,14 +153,14 @@ export default function InventoryPage() {
   const okCount  = items.filter((i) => !i.is_low_stock).length;
 
   return (
-    <div className="p-8 space-y-8 bg-[#f8fafc] min-h-screen">
+    <div className="p-8 space-y-8 bg-background min-h-screen">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Inventory</h1>
-          <p className="text-slate-500">Stock levels and restock management</p>
+          <h1 className="text-3xl font-bold text-foreground">Inventory</h1>
+          <p className="text-muted-foreground">Stock levels and restock management</p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg-white">
+          <Button onClick={fetchInventory} variant="outline" className="rounded-xl h-12 gap-2 bg-background">
             <RefreshCw className="size-4" /> Refresh
           </Button>
           <Button onClick={() => { setAddDialogOpen(true); }} className="rounded-xl h-12 gap-2">
@@ -170,46 +170,46 @@ export default function InventoryPage() {
       </header>
 
       {error && (
-        <div className="bg-red-50 border-2 border-dashed border-red-200 rounded-3xl p-6 flex items-center gap-4">
-          <AlertTriangle className="size-6 text-red-500" />
-          <p className="text-red-700 font-bold">{error}</p>
-          <Button onClick={fetchInventory} className="ml-auto rounded-xl bg-red-600 text-white border-none">Retry</Button>
+        <div className="bg-destructive/10 border-2 border-dashed border-destructive/20 rounded-3xl p-6 flex items-center gap-4">
+          <AlertTriangle className="size-6 text-destructive" />
+          <p className="text-destructive font-bold">{error}</p>
+          <Button onClick={fetchInventory} className="ml-auto rounded-xl bg-destructive text-destructive-foreground border-none">Retry</Button>
         </div>
       )}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: "Total Items",      value: loading ? "—" : items.length.toString(),  icon: Package,      color: "text-blue-600",    bg: "bg-blue-50"    },
-          { label: "Low Stock",        value: loading ? "—" : lowCount.toString(),      icon: AlertTriangle,color: "text-red-600",     bg: "bg-red-50"     },
-          { label: "Sufficient Stock", value: loading ? "—" : okCount.toString(),       icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Total Items",      value: loading ? "—" : items.length.toString(),  icon: Package,      color: "text-primary",    bg: "bg-primary/10"    },
+          { label: "Low Stock",        value: loading ? "—" : lowCount.toString(),      icon: AlertTriangle,color: "text-destructive", bg: "bg-destructive/10" },
+          { label: "Sufficient Stock", value: loading ? "—" : okCount.toString(),       icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
         ].map((kpi, i) => (
           <Card key={i} className="border-none shadow-sm rounded-[2rem]">
             <CardContent className="p-8">
               <div className={`size-12 ${kpi.bg} ${kpi.color} rounded-2xl flex items-center justify-center mb-6`}>
                 <kpi.icon className="size-6" />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">{kpi.label}</span>
-              <div className="text-3xl font-black text-slate-900">{kpi.value}</div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">{kpi.label}</span>
+              <div className="text-3xl font-black text-foreground">{kpi.value}</div>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {!loading && lowCount > 0 && (
-        <div className="bg-red-50 border-2 border-dashed border-red-200 rounded-[2rem] p-6 flex items-center gap-4">
-          <AlertTriangle className="size-8 text-red-500 shrink-0" />
+        <div className="bg-destructive/10 border-2 border-dashed border-destructive/20 rounded-[2rem] p-6 flex items-center gap-4">
+          <AlertTriangle className="size-8 text-destructive shrink-0" />
           <div>
-            <p className="font-black text-red-900 uppercase">{lowCount} item{lowCount > 1 ? "s" : ""} running low</p>
-            <p className="text-red-700 text-sm">Click the restock button on any item below to top up stock.</p>
+            <p className="font-black text-destructive uppercase">{lowCount} item{lowCount > 1 ? "s" : ""} running low</p>
+            <p className="text-destructive/80 text-sm">Click the restock button on any item below to top up stock.</p>
           </div>
         </div>
       )}
 
       {/* Toolbar for bulk actions */}
       {removeIds.length > 0 && (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
-          <span className="text-slate-700 font-medium">{removeIds.length} item(s) selected</span>
+        <div className="bg-muted/50 border border-border rounded-2xl p-4 flex items-center justify-between">
+          <span className="text- className="text-foreground font-medium">{removeIds.length} item(s) selected</span>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Clear</Button>
             <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={removing} className="rounded-xl">
@@ -222,7 +222,7 @@ export default function InventoryPage() {
       {/* Items grid */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => <div key={i} className="h-48 bg-white rounded-[2.5rem] animate-pulse" />)}
+          {[...Array(6)].map((_, i) => <div key={i} className="h-48 bg-card rounded-[2.5rem] animate-pulse" />)}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,43 +230,41 @@ export default function InventoryPage() {
             const pct = Math.min(100, Math.round((item.stock / Math.max(item.low_stock_threshold * 3, 1)) * 100));
             const selected = removeIds.includes(item.id);
             return (
-              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow-hidden transition-all", item.is_low_stock ? "ring-2 ring-red-200" : "", selected && "ring-2 ring-primary ring-offset-2")}>
+              <Card key={item.id} className={cn("border-none shadow-sm rounded-[2.5rem] overflow-hidden transition-all", item.is_low_stock ? "ring-2 ring-destructive/20" : "", selected && "ring-2 ring-primary ring-offset-2")}>
                 <CardContent className="p-8 space-y-6">
                   <div className="flex justify-between items-start">
                     <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                       <Package className="size-6" />
                     </div>
-                    <Badge className={cn("border-none font-bold rounded-full px-3", item.is_low_stock ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600")}>
+                    <Badge className={cn("border-none font-bold rounded-full px-3", item.is_low_stock ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-600")}>
                       {item.is_low_stock ? "Low Stock" : "OK"}
                     </Badge>
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase">{item.name}</h3>
-                    <p className="text-slate-400 text-xs font-bold uppercase mt-1">Threshold: {item.low_stock_threshold} {item.unit ?? "units"}</p>
+                    <h3 className="text-lg font-black text-foreground uppercase">{item.name}</h3>
+                    <p className="text-muted-foreground text-xs font-bold uppercase mt-1">Threshold: {item.low_stock_threshold} {item.unit ?? "units"}</p>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase">
+                    <div className="flex justify-between text-xs font-bold text-muted-foreground uppercase">
                       <span>Stock Level</span>
-                      <span className={item.is_low_stock ? "text-red-600" : "text-emerald-600"}>{item.stock} {item.unit ?? "units"}</span>
+                      <span className={item.is_low_stock ? "text-destructive" : "text-emerald-600"}>{item.stock} {item.unit ?? "units"}</span>
                     </div>
-                    <Progress value={pct} className={cn("h-3 rounded-full bg-slate-100", item.is_low_stock ? "[&>div]:bg-red-500" : "[&>div]:bg-emerald-500")} />
+                    <Progress value={pct} className={cn("h-3 rounded-full bg-muted", item.is_low_stock ? "[&>div]:bg-destructive" : "[&>div]:bg-emerald-500")} />
                   </div>
                   <Button
                     onClick={() => { setRestockItem(item); setRestockQty("10"); }}
                     variant={item.is_low_stock ? "default" : "outline"}
-                    className={cn("w-full rounded-2xl h-12 font-black uppercase text-xs tracking-widest gap-2", item.is_low_stock ? "shadow-lg shadow-primary/20" : "border-2")}
+                    className={cn("w-full rounded-2xl h-12 font-black uppercase text-xs tracking-widest gap-2", item.is_low_stock ? "shadow-lg shadow-primary/20" : "border-2 border-border")}
                   >
                     <Plus className="size-4" /> Restock
                   </Button>
-                  {removeIds.length > 0 && (
-                    <Button
-                      variant={selected ? "default" : "outline"}
-                      className="w-full rounded-2xl h-10 text-xs font-medium gap-2 border-slate-300"
-                      onClick={() => toggleRemoveId(item.id)}
-                    >
-                      {selected ? <Check className="size-3" /> : <Check className="size-3 opacity-0" />}
-                    </Button>
-                  )}
+                  <Button
+                    variant={selected ? "default" : "outline"}
+                    className="w-full rounded-2xl h-10 text-xs font-medium gap-2 border-border"
+                    onClick={() => toggleRemoveId(item.id)}
+                  >
+                    {selected ? <Check className="size-3" /> : <Check className="size-3 opacity-0" />}
+                  </Button>
                 </CardContent>
               </Card>
             );
@@ -281,13 +279,13 @@ export default function InventoryPage() {
             <DialogTitle className="text-xl font-black uppercase">Restock — {restockItem?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-slate-500 text-sm">Current stock: <strong>{restockItem?.stock} {restockItem?.unit ?? "units"}</strong></p>
+            <p className="text-muted-foreground text-sm">Current stock: <strong>{restockItem?.stock} {restockItem?.unit ?? "units"}</strong></p>
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase text-slate-500">Quantity to add</label>
+              <label className="text-xs font-bold uppercase text-muted-foreground">Quantity to add</label>
               <Input type="number" min="1" value={restockQty} onChange={(e) => setRestockQty(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
             </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <p className="text-sm font-bold text-slate-600">New stock will be: <span className="text-emerald-600 font-black text-lg">{(restockItem?.stock ?? 0) + (parseInt(restockQty) || 0)} {restockItem?.unit ?? "units"}</span></p>
+            <div className="bg-muted/50 rounded-2xl p-4">
+              <p className="text-sm font-bold text-foreground">New stock will be: <span className="text-emerald-600 font-black text-lg">{(restockItem?.stock ?? 0) + (parseInt(restockQty) || 0)} {restockItem?.unit ?? "units"}</span></p>
             </div>
           </div>
           <DialogFooter>
@@ -308,21 +306,21 @@ export default function InventoryPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase text-slate-500">Item Name</label>
+              <label className="text-xs font-bold uppercase text-muted-foreground">Item Name</label>
               <Input value={addItemName} onChange={(e) => setAddItemName(e.target.value)} placeholder="e.g. Shampoo, Wax, Microfiber" className="rounded-xl h-12 border-2 text-lg font-medium" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-500">Initial Stock</label>
+                <label className="text-xs font-bold uppercase text-muted-foreground">Initial Stock</label>
                 <Input type="number" min="0" value={addItemStock} onChange={(e) => setAddItemStock(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-500">Low Stock Threshold</label>
+                <label className="text-xs font-bold uppercase text-muted-foreground">Low Stock Threshold</label>
                 <Input type="number" min="1" value={addItemThreshold} onChange={(e) => setAddItemThreshold(e.target.value)} className="rounded-xl h-12 border-2 text-lg font-black" />
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase text-slate-500">Unit</label>
+              <label className="text-xs font-bold uppercase text-muted-foreground">Unit</label>
               <Input value={addItemUnit} onChange={(e) => setAddItemUnit(e.target.value)} placeholder="units, liters, kg, etc." className="rounded-xl h-12 border-2 text-lg font-medium" />
             </div>
           </div>
@@ -342,7 +340,7 @@ export default function InventoryPage() {
           <DialogHeader>
             <DialogTitle className="text-xl font-black uppercase">Remove {removeIds.length} Item(s)?</DialogTitle>
           </DialogHeader>
-          <p className="text-slate-500 py-4">This action cannot be undone. The selected inventory items will be permanently deleted.</p>
+          <p className="text-muted-foreground py-4">This action cannot be undone. The selected inventory items will be permanently deleted.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRemoveDialogOpen(false)} className="rounded-xl">Cancel</Button>
             <Button variant="destructive" onClick={handleRemoveItems} disabled={removing} className="rounded-xl gap-2">

@@ -114,8 +114,8 @@ type TabKey = "track" | "book" | "history"
 
 function txStatusClass(status: string) {
   return status === "Paid"
-    ? "bg-emerald-100 text-emerald-700"
-    : "bg-amber-100 text-amber-700"
+    ? "bg-emerald-500/10 text-emerald-600"
+    : "bg-amber-500/10 text-amber-600"
 }
 
 function formatDate(iso: string) {
@@ -320,7 +320,7 @@ export default function CustomerPage() {
         </Card>
 
         {nextBooking && (
-          <Card className="rounded-3xl border-emerald-200 bg-emerald-50/60">
+          <Card className="rounded-3xl border-emerald-500/20 bg-emerald-500/10">
             <CardContent className="py-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
                 <CalendarPlus className="w-5 h-5" />
@@ -363,19 +363,19 @@ export default function CustomerPage() {
                         <div key={step} className="flex items-center flex-1">
                           <div className="flex flex-col items-center gap-1 flex-1">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                              active ? (current ? "bg-blue-500 text-white ring-2 ring-blue-200" : "bg-emerald-500 text-white") : "bg-slate-100 text-slate-400"
+                              active ? (current ? "bg-primary text-white ring-2 ring-primary/20" : "bg-emerald-500 text-white") : "bg-muted text-muted-foreground"
                             }`}>{i + 1}</div>
                             <span className={`text-xs ${active ? "font-medium" : "text-muted-foreground"}`}>{step}</span>
                           </div>
                           {i < STATUS_STEPS.length - 1 && (
-                            <div className={`h-0.5 w-full mb-5 transition-colors ${stepIndex(vehicle.status) > i ? "bg-emerald-400" : "bg-slate-100"}`} />
+                            <div className={`h-0.5 w-full mb-5 transition-colors ${stepIndex(vehicle.status) > i ? "bg-emerald-400" : "bg-muted"}`} />
                           )}
                         </div>
                       )
                     })}
                   </div>
 
-                  <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+                  <div className="bg-muted/50 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-lg">{vehicle.plate}</span>
                       <Badge className={vehicle.status === "Ready" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}>

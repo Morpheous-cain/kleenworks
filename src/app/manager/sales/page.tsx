@@ -107,7 +107,7 @@ export default function SalesPage() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="p-8 space-y-8 bg-[#f8fafc] min-h-screen">
+    <div className="p-8 space-y-8 bg-background min-h-screen">
       {/* Header */}
       <header className="flex justify-between items-center">
         <div>
@@ -131,18 +131,18 @@ export default function SalesPage() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: "Total Revenue (shown)", value: loading ? "—" : fmt(totalRevenue), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Paid Transactions", value: loading ? "—" : paidTxns.length.toString(), icon: CheckCircle2, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Pending", value: loading ? "—" : pendingCount.toString(), icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Total Records", value: loading ? "—" : total.toString(), icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50" },
+          { label: "Total Revenue (shown)", value: loading ? "—" : fmt(totalRevenue), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+          { label: "Paid Transactions", value: loading ? "—" : paidTxns.length.toString(), icon: CheckCircle2, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Pending", value: loading ? "—" : pendingCount.toString(), icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
+          { label: "Total Records", value: loading ? "—" : total.toString(), icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-500/10" },
         ].map((kpi, i) => (
           <Card key={i} className="border-none shadow-sm rounded-[2rem]">
             <CardContent className="p-8">
               <div className={`size-12 ${kpi.bg} ${kpi.color} rounded-2xl flex items-center justify-center mb-6`}>
                 <kpi.icon className="size-6" />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">{kpi.label}</span>
-              <div className="text-2xl font-black text-slate-900">{kpi.value}</div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">{kpi.label}</span>
+              <div className="text-2xl font-black text-foreground">{kpi.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -152,10 +152,10 @@ export default function SalesPage() {
       {!loading && Object.keys(byMethod).length > 0 && (
         <div className="flex gap-4 flex-wrap">
           {Object.entries(byMethod).map(([method, amount]) => (
-            <div key={method} className="bg-white rounded-2xl shadow-sm px-6 py-4 flex items-center gap-3">
+            <div key={method} className="bg-card rounded-2xl shadow-sm px-6 py-4 flex items-center gap-3">
               <div className="size-2 rounded-full bg-primary" />
-              <span className="font-bold text-slate-600 text-sm">{method}</span>
-              <span className="font-black text-slate-900">{fmt(amount)}</span>
+              <span className="font-bold text-muted-foreground text-sm">{method}</span>
+              <span className="font-black text-foreground">{fmt(amount)}</span>
             </div>
           ))}
         </div>
@@ -164,17 +164,17 @@ export default function SalesPage() {
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[180px]">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search plate..."
             value={plate}
             onChange={(e) => setPlate(e.target.value.toUpperCase())}
             onKeyDown={(e) => e.key === "Enter" && fetchTransactions(0)}
-            className="pl-12 h-12 rounded-2xl border-2 bg-white font-bold uppercase"
+            className="pl-12 h-12 rounded-2xl border-2 bg-background font-bold uppercase"
           />
         </div>
         <Select value={status} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-36 h-12 rounded-2xl border-2 bg-white font-bold">
+          <SelectTrigger className="w-36 h-12 rounded-2xl border-2 bg-background font-bold">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
@@ -188,14 +188,14 @@ export default function SalesPage() {
           type="date"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="h-12 rounded-2xl border-2 bg-white font-bold w-44"
+          className="h-12 rounded-2xl border-2 bg-background font-bold w-44"
           placeholder="From date"
         />
         <Input
           type="date"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="h-12 rounded-2xl border-2 bg-white font-bold w-44"
+          className="h-12 rounded-2xl border-2 bg-background font-bold w-44"
           placeholder="To date"
         />
         <Button onClick={() => fetchTransactions(0)} className="h-12 rounded-2xl px-6 font-black uppercase text-xs tracking-widest">
@@ -204,7 +204,7 @@ export default function SalesPage() {
         <Button
           variant="outline"
           onClick={() => { setPlate(""); setStatus(""); setFrom(""); setTo(""); fetchTransactions(0); }}
-          className="h-12 rounded-2xl px-6 font-black uppercase text-xs tracking-widest bg-white"
+          className="h-12 rounded-2xl px-6 font-black uppercase text-xs tracking-widest bg-background"
         >
           Clear
         </Button>
@@ -212,7 +212,7 @@ export default function SalesPage() {
 
       {/* Table */}
       <Card className="border-none shadow-sm rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="p-8 border-b bg-slate-50/50">
+        <CardHeader className="p-8 border-b bg-muted/50">
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="text-xl font-bold">Transactions</CardTitle>
@@ -224,17 +224,17 @@ export default function SalesPage() {
           {loading ? (
             <div className="p-8 space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-14 bg-slate-100 rounded-2xl animate-pulse" />
+                <div key={i} className="h-14 bg-muted/50 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : transactions.length === 0 ? (
-            <div className="p-16 text-center text-slate-400 font-bold">No transactions found</div>
+            <div className="p-16 text-center text-muted-foreground font-bold">No transactions found</div>
           ) : (
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-muted/50">
                 <TableRow className="border-none">
                   {["Date", "Plate", "Customer", "Services", "Method", "Amount", "Status"].map((h) => (
-                    <TableHead key={h} className="font-black text-[9px] uppercase text-slate-400 tracking-widest px-6">
+                    <TableHead key={h} className="font-black text-[9px] uppercase text-muted-foreground tracking-widest px-6">
                       {h}
                     </TableHead>
                   ))}
@@ -242,22 +242,22 @@ export default function SalesPage() {
               </TableHeader>
               <TableBody>
                 {transactions.map((tx) => (
-                  <TableRow key={tx.id} className="border-slate-50 hover:bg-slate-50 transition-colors">
+                  <TableRow key={tx.id} className="border-muted/50 hover:bg-muted/50 transition-colors">
                     <TableCell className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-slate-900">
+                        <span className="text-xs font-black text-foreground">
                           {format(new Date(tx.date ?? tx.id), "dd MMM")}
                         </span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase">
                           {tx.mpesa_receipt ?? tx.id.slice(0, 8)}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6">
-                      <span className="font-mono font-black text-slate-900">{tx.plate}</span>
+                      <span className="font-mono font-black text-foreground">{tx.plate}</span>
                     </TableCell>
                     <TableCell className="px-6">
-                      <span className="text-sm text-slate-600">{tx.customer?.name ?? "—"}</span>
+                      <span className="text-sm text-muted-foreground">{tx.customer?.name ?? "—"}</span>
                     </TableCell>
                     <TableCell className="px-6">
                       <div className="flex gap-1 flex-wrap">
@@ -274,7 +274,7 @@ export default function SalesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="px-6">
-                      <span className="text-xs font-bold text-slate-600">{tx.payment_method}</span>
+                      <span className="text-xs font-bold text-muted-foreground">{tx.payment_method}</span>
                     </TableCell>
                     <TableCell className="px-6">
                       <span className="text-sm font-black text-primary">{fmt(tx.amount)}</span>
@@ -282,9 +282,9 @@ export default function SalesPage() {
                     <TableCell className="px-6">
                       <Badge className={cn(
                         "border-none font-bold rounded-full text-[9px]",
-                        tx.status === "Paid"    ? "bg-emerald-100 text-emerald-700" :
-                        tx.status === "Pending" ? "bg-amber-100 text-amber-700" :
-                                                  "bg-red-100 text-red-700"
+                        tx.status === "Paid"    ? "bg-emerald-500/10 text-emerald-600" :
+                        tx.status === "Pending" ? "bg-amber-500/10 text-amber-600" :
+                                                  "bg-destructive/10 text-destructive"
                       )}>
                         {tx.status === "Paid" && <CheckCircle2 className="size-2 mr-1 inline" />}
                         {tx.status}
