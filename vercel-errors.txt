@@ -1,0 +1,76 @@
+09:39:23.786 Running build in Washington, D.C., USA (East) – iad1
+09:39:23.787 Build machine configuration: 2 cores, 8 GB
+09:39:23.901 Cloning github.com/Morpheous-cain/kleenworks (Branch: main, Commit: 52c0799)
+09:39:24.251 Cloning completed: 349.000ms
+09:39:25.248 Restored build cache from previous deployment (4C12iAvhnnkgXbXhjJqUiZkYjiud)
+09:39:25.499 Running "vercel build"
+09:39:25.538 Vercel CLI 56.2.0
+09:39:25.949 Installing dependencies...
+09:39:27.381 
+09:39:27.381 up to date in 1s
+09:39:27.382 
+09:39:27.382 123 packages are looking for funding
+09:39:27.383   run `npm fund` for details
+09:39:27.411 Detected Next.js version: 15.5.9
+09:39:27.418 Running "npm run build"
+09:39:27.524 
+09:39:27.525 > nextn@0.1.0 build
+09:39:27.525 > cross-env NODE_ENV=production next build
+09:39:27.525 
+09:39:28.638    ▲ Next.js 15.5.9
+09:39:28.639 
+09:39:28.690    Creating an optimized production build ...
+09:39:36.479 Failed to compile.
+09:39:36.480 
+09:39:36.499 ./src/app/manager/inventory/page.tsx
+09:39:36.500 Error:   x Unterminated string constant
+09:39:36.501      ,-[/vercel/path0/src/app/manager/inventory/page.tsx:212:1]
+09:39:36.501  209 |       {/* Toolbar for bulk actions */}
+09:39:36.501  210 |       {removeIds.length > 0 && (
+09:39:36.501  211 |         <div className="bg-muted/50 border border-border rounded-2xl p-4 flex items-center justify-between">
+09:39:36.502  212 |           <span className="text- className="text-foreground font-medium">{removeIds.length} item(s) selected</span>
+09:39:36.502      :                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+09:39:36.513  213 |           <div className="flex gap-2">
+09:39:36.514  214 |             <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Clear</Button>
+09:39:36.514  215 |             <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={removing} className="rounded-xl">
+09:39:36.515      `----
+09:39:36.516   x Expected '</', got 'string literal (>{removeIds.length} item(s) selected</span>, ">{removeIds.length} item(s) selected</span>)'
+09:39:36.518      ,-[/vercel/path0/src/app/manager/inventory/page.tsx:212:1]
+09:39:36.518  209 |       {/* Toolbar for bulk actions */}
+09:39:36.518  210 |       {removeIds.length > 0 && (
+09:39:36.518  211 |         <div className="bg-muted/50 border border-border rounded-2xl p-4 flex items-center justify-between">
+09:39:36.518  212 |           <span className="text- className="text-foreground font-medium">{removeIds.length} item(s) selected</span>
+09:39:36.519      :                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+09:39:36.519  213 |           <div className="flex gap-2">
+09:39:36.519  214 |             <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Clear</Button>
+09:39:36.519  215 |             <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={removing} className="rounded-xl">
+09:39:36.519      `----
+09:39:36.519 
+09:39:36.519 Caused by:
+09:39:36.520     Syntax Error
+09:39:36.536 
+09:39:36.536 Import trace for requested module:
+09:39:36.537 ./src/app/manager/inventory/page.tsx
+09:39:36.537 
+09:39:36.537 ./src/app/manager/payroll/page.tsx
+09:39:36.540 Error:   x Unexpected token `(`. Expected `}`
+09:39:36.540      ,-[/vercel/path0/src/app/manager/payroll/page.tsx:179:1]
+09:39:36.541  176 |   if (!mounted) return null;
+09:39:36.541  177 | 
+09:39:36.541  178 |   return (
+09:39:36.541  179 |       description: `KES ${confirmingDisburse.netPay.toLocaleString()} disbursed to ${confirmingDisburse.staffName}.`,
+09:39:36.541      :                                                                   ^
+09:39:36.541  180 |     });
+09:39:36.541  181 |     setConfirmingDisburse(null);
+09:39:36.542  182 |   };
+09:39:36.542      `----
+09:39:36.542 
+09:39:36.542 Caused by:
+09:39:36.542     Syntax Error
+09:39:36.542 
+09:39:36.542 Import trace for requested module:
+09:39:36.542 ./src/app/manager/payroll/page.tsx
+09:39:36.542 
+09:39:36.543 
+09:39:36.543 > Build failed because of webpack errors
+09:39:36.562 Error: Command "npm run build" exited with 1

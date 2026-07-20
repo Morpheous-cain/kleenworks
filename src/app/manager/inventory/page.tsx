@@ -209,7 +209,7 @@ export default function InventoryPage() {
       {/* Toolbar for bulk actions */}
       {removeIds.length > 0 && (
         <div className="bg-muted/50 border border-border rounded-2xl p-4 flex items-center justify-between">
-          <span className="text- className="text-foreground font-medium">{removeIds.length} item(s) selected</span>
+          <span className="text-foreground font-medium">{removeIds.length} item(s) selected</span>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setRemoveIds([])} className="rounded-xl">Clear</Button>
             <Button variant="destructive" onClick={() => setRemoveDialogOpen(true)} disabled={removing} className="rounded-xl">

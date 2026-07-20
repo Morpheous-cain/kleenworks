@@ -456,7 +456,7 @@ export default function AgentPortal() {
             <h1 className="text-2xl font-black uppercase tracking-tighter leading-none">
               Kleen Works Desk
             </h1>
-            <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] mt-1 capitalize">
+            <p className="text-slate-600 text-[11px] font-black uppercase tracking-[0.2em] mt-1 capitalize">
               {agentName} · Agent
             </p>
           </div>
@@ -468,7 +468,7 @@ export default function AgentPortal() {
               <Warehouse className="size-4" />
             </div>
             <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase leading-none">
+              <p className="text-[10px] font-black text-slate-600 uppercase leading-none">
                 Bays Free
               </p>
               <p className="text-sm font-black text-slate-900 leading-none mt-1">
@@ -484,7 +484,7 @@ export default function AgentPortal() {
               <Car className="size-4" />
             </div>
             <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase leading-none">
+              <p className="text-[10px] font-black text-slate-600 uppercase leading-none">
                 In Queue
               </p>
               <p className="text-sm font-black text-slate-900 leading-none mt-1">
@@ -507,28 +507,58 @@ export default function AgentPortal() {
         </div>
       </header>
 
+      {/* Mobile header stats - visible on mobile only */}
+      <div className="md:hidden grid grid-cols-2 gap-3">
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
+          <div className="size-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+            <Warehouse className="size-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-600 uppercase leading-none">
+              Bays Free
+            </p>
+            <p className="text-sm font-black text-slate-900 leading-none mt-1">
+              {dataLoading ? "…" : `${availableBays.length} / ${bays.length}`}
+            </p>
+          </div>
+        </div>
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
+          <div className="size-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+            <Car className="size-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-600 uppercase leading-none">
+              In Queue
+            </p>
+            <p className="text-sm font-black text-slate-900 leading-none mt-1">
+              {dataLoading ? "…" : queueCount}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <Tabs defaultValue="checkin" className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-14 rounded-2xl bg-slate-200/50 p-1 mb-6">
           <TabsTrigger
             value="checkin"
-            className="rounded-xl font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="rounded-xl font-black uppercase text-[11px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
             <Plus className="size-3 mr-2" /> Check‑In
           </TabsTrigger>
           <TabsTrigger
             value="workflow"
-            className="rounded-xl font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="rounded-xl font-black uppercase text-[11px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
             <LayoutGrid className="size-3 mr-2" /> Workflow
           </TabsTrigger>
           <TabsTrigger
             value="payments"
-            className="rounded-xl font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            className="rounded-xl font-black uppercase text-[11px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
             <Wallet className="size-3 mr-2" /> Payments
             {pendingCheckouts.filter((v) => v.status === "Ready").length > 0 && (
-              <Badge className="ml-2 h-4 w-4 p-0 flex items-center justify-center bg-red-500 text-[8px] text-white">
+              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-[9px] text-white">
                 {pendingCheckouts.filter((v) => v.status === "Ready")
                   .length}
               </Badge>
@@ -546,14 +576,14 @@ export default function AgentPortal() {
               <CardTitle className="text-lg md:text-xl font-black uppercase leading-none">
                 New Entry
               </CardTitle>
-              <CardDescription className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">
+              <CardDescription className="text-slate-300 font-bold uppercase text-[10px] tracking-widest mt-1">
                 Capture details to begin workflow
               </CardDescription>
             </CardHeader>
 
             <CardContent className="p-6 md:p-8 space-y-8">
               <div className="space-y-3">
-                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                   License Plate
                 </label>
                 <Input
@@ -565,8 +595,8 @@ export default function AgentPortal() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  Car Make / Model <span className="text-slate-300">(Optional)</span>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+                  Car Make / Model <span className="text-slate-400">(Optional)</span>
                 </label>
                 <Input
                   placeholder="e.g. Toyota Axio, Probox, RAV4"
@@ -578,7 +608,7 @@ export default function AgentPortal() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                     Assign Bay (Optional)
                   </label>
                   <Select
@@ -610,7 +640,7 @@ export default function AgentPortal() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                     Assign Attendant
                   </label>
                   <Select
@@ -642,7 +672,7 @@ export default function AgentPortal() {
               </div>
 
               <div className="space-y-4">
-                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                   Select Services
                 </label>
                 {services.length === 0 ? (
@@ -665,14 +695,14 @@ export default function AgentPortal() {
                           "flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left",
                           selectedServices.includes(service.id)
                             ? "border-primary bg-primary/5"
-                            : "border-slate-50 bg-slate-50/50 hover:border-slate-200"
+                            : "border-slate-200 bg-white hover:border-slate-300"
                         )}
                       >
                         <div className="flex flex-col">
-                          <span className="font-black text-[11px] md:text-xs uppercase text-slate-900 leading-tight">
+                          <span className="font-black text-xs md:text-sm uppercase text-slate-900 leading-tight">
                             {service.name}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter mt-1">
                             KSh {service.price.toLocaleString()} ·{" "}
                             {service.duration}min
                           </span>
@@ -682,7 +712,7 @@ export default function AgentPortal() {
                             "rounded-full p-1 transition-colors",
                             selectedServices.includes(service.id)
                               ? "bg-primary text-white"
-                              : "bg-slate-200 text-slate-200"
+                              : "bg-slate-200 text-slate-400"
                           )}
                         >
                           <Check className="w-3 h-3" />
@@ -819,12 +849,12 @@ export default function AgentPortal() {
                       </div>
                       <Badge
                         className={cn(
-                          "font-black text-[8px] uppercase shrink-0",
+                          "font-black text-[10px] uppercase shrink-0",
                           v.status === "In-Bay"
                             ? "bg-amber-500 text-white"
                             : v.status === "Ready"
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-100 text-slate-500 border-none"
+                            : "bg-slate-100 text-slate-600 border-none"
                         )}
                       >
                         {v.bay?.name ??
@@ -832,11 +862,11 @@ export default function AgentPortal() {
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-dashed border-slate-100">
-                      <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
                         <User className="size-3" />
                         {v.attendant?.name ?? "Unassigned"}
                       </div>
-                      <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
                         <Clock className="size-3" />
                         {new Date(v.arrival_time).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -845,14 +875,14 @@ export default function AgentPortal() {
                       </div>
                     </div>
                     {v.total_amount > 0 && (
-                      <div className="mt-2 text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                      <div className="mt-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
                         KSh {v.total_amount.toLocaleString("en-KE")}
                       </div>
                     )}
 
                     {v.status === "In-Bay" && (
                       <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                        <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-600">
                           <span>Live Progress</span>
                           <span className="text-primary">{v.progress ?? 0}%</span>
                         </div>

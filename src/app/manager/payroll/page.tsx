@@ -176,41 +176,6 @@ export default function PayrollPage() {
   if (!mounted) return null;
 
   return (
-      description: `KES ${confirmingDisburse.netPay.toLocaleString()} disbursed to ${confirmingDisburse.staffName}.`,
-    });
-    setConfirmingDisburse(null);
-  };
-
-  const handleUpdateDeductions = () => {
-    if (!editingRecord) return;
-    
-    const amount = parseFloat(advanceAmount) || 0;
-    const updatedRecords = records.map(r => {
-      if (r.id === editingRecord.id) {
-        const totalDeductions = r.deductions + amount;
-        const newNetPay = (r.baseAmount + r.commission) - totalDeductions;
-        return {
-          ...r,
-          deductions: totalDeductions,
-          netPay: newNetPay,
-          status: 'Draft' as const 
-        };
-      }
-      return r;
-    });
-
-    setRecords(updatedRecords);
-    toast({
-      title: adjustmentType === 'Advance' ? "Advance Ledgered" : "Liability Recorded",
-      description: `KES ${amount.toLocaleString()} has been adjusted. New approval required.`,
-    });
-    setEditingRecord(null);
-    setAdvanceAmount("0");
-  };
-
-  if (!mounted) return null;
-
-  return (
     <div className="p-8 space-y-8 bg-[#f1f5f9] min-h-screen font-body">
       <header className="flex justify-between items-center">
         <div>
