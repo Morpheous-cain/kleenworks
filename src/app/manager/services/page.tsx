@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function ServicesPage() {
   const { toast } = useToast();
@@ -328,10 +329,11 @@ export default function ServicesPage() {
                 onChange={(e) => setNewService({...newService, category: e.target.value})}
                 className="w-full h-14 rounded-2xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all text-uppercase px-4"
               >
-                <option value="Wash">Exterior Wash</option>
-                <option value="Detail">Detailing</option>
-                <option value="Interior">Interior Care</option>
-                <option value="Addon">Add-On Service</option>
+                <option value="Wash">Wash</option>
+                <option value="Detailing">Detailing</option>
+                <option value="Tinting">Tinting</option>
+                <option value="Home">Home</option>
+                <option value="Merchandise">Merchandise</option>
               </select>
             </div>
 

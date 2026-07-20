@@ -8,14 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  CreditCard, 
-  Users, 
-  Banknote, 
-  ShieldCheck, 
-  Zap, 
-  Download, 
-  Send, 
+import {
+  CreditCard,
+  Users,
+  Banknote,
+  ShieldCheck,
+  Zap,
+  Download,
+  Send,
   AlertCircle,
   PlusCircle,
   Calculator,
@@ -23,7 +23,8 @@ import {
   ExternalLink,
   ShieldAlert,
   ArrowRight,
-  X
+  X,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -47,17 +48,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function PayrollPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [records, setRecords] = useState<PayrollRecord[]>([]);
-  
+  const [staff, setStaff] = useState<{id: string, name: string, base_salary: number}[]>([]);
+
   // Modal States
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [confirmingDisburse, setConfirmingDisburse] = useState<any>(null);
-  
+  const [creatingRecord, setCreatingRecord] = useState(false);
+  const [newRecordForm, setNewRecordForm] = useState({ staffId: '', month: '', baseAmount: '', commission: '0', deductions: '0' });
+
   // Form States
   const [advanceAmount, setAdvanceAmount] = useState<string>("0");
   const [adjustmentType, setAdjustmentType] = useState<'Advance' | 'Liability'>('Advance');
@@ -67,6 +72,12 @@ export default function PayrollPage() {
     fetch('/api/payroll', { credentials: 'include' })
       .then(r => r.json())
       .then(data => setRecords(data))
+      .catch(() => {});
+
+    // Fetch staff for creating new payroll records
+    fetch('/api/staff', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => setStaff(data.filter((s: any) => s.base_salary)))
       .catch(() => {});
   }, []);
 
@@ -97,6 +108,74 @@ export default function PayrollPage() {
     setRecords(prev => prev.map(r => r.id === confirmingDisburse.id ? { ...r, status: 'Disbursed' as const } : r));
     toast({
       title: "M-Pesa Push Successful",
+      description: `KES ${confirmingDisburse.netPay.toLocaleString()} disbursed to ${confirmingDisburse.staffName}.`,
+    });
+    setConfirmingDisburse(null);
+  };
+
+  const handleUpdateDeductions = () => {
+    if (!editingRecord) return;
+
+    const amount = parseFloat(advanceAmount) || 0;
+    const updatedRecords = records.map(r => {
+      if (r.id === editingRecord.id) {
+        const totalDeductions = r.deductions + amount;
+        const newNetPay = (r.baseAmount + r.commission) - totalDeductions;
+        return {
+          ...r,
+          deductions: totalDeductions,
+          netPay: newNetPay,
+          status: 'Draft' as const
+        };
+      }
+      return r;
+    });
+
+    setRecords(updatedRecords);
+    toast({
+      title: adjustmentType === 'Advance' ? "Advance Ledgered" : "Liability Recorded",
+      description: `KES ${amount.toLocaleString()} has been adjusted. New approval required.`,
+    });
+    setEditingRecord(null);
+    setAdvanceAmount("0");
+  };
+
+  const handleCreatePayrollRecord = async () => {
+    const staffMember = staff.find(s => s.id === newRecordForm.staffId);
+    if (!staffMember) return;
+
+    try {
+      const res = await fetch('/api/payroll', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          staff_id: newRecordForm.staffId,
+          month: newRecordForm.month,
+          base_amount: Number(newRecordForm.baseAmount) || staffMember.base_salary,
+          commission: Number(newRecordForm.commission) || 0,
+          deductions: Number(newRecordForm.deductions) || 0,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? 'Create failed');
+      }
+
+      const data = await res.json();
+      setRecords(prev => [...prev, data]);
+      toast({ title: "Payroll Record Created", description: `Record for ${staffMember.name} added.` });
+      setCreatingRecord(false);
+      setNewRecordForm({ staffId: '', month: '', baseAmount: '', commission: '0', deductions: '0' });
+    } catch (e: unknown) {
+      toast({ title: "Failed", description: e instanceof Error ? e.message : 'Could not create', variant: "destructive" });
+    }
+  };
+
+  if (!mounted) return null;
+
+  return (
       description: `KES ${confirmingDisburse.netPay.toLocaleString()} disbursed to ${confirmingDisburse.staffName}.`,
     });
     setConfirmingDisburse(null);
@@ -142,11 +221,18 @@ export default function PayrollPage() {
           <Button variant="outline" className="rounded-2xl h-14 gap-3 bg-white border-none shadow-xl font-black uppercase text-[11px] tracking-widest" onClick={() => toast({ title: "Export Engine", description: "Compiling payslips for all staff..."})}>
             <Download className="size-4" /> Export Payslips
           </Button>
-          <Button 
-            className="rounded-2xl h-14 gap-3 shadow-2xl shadow-primary/30 px-8 font-black uppercase text-[11px] tracking-widest bg-primary hover:bg-blue-600 transition-all text-white border-none" 
+          <Button
+            className="rounded-2xl h-14 gap-3 shadow-2xl shadow-primary/30 px-8 font-black uppercase text-[11px] tracking-widest bg-primary hover:bg-blue-600 transition-all text-white border-none"
             onClick={() => toast({ title: "Batch Processing", description: "Disbursing all approved payments via Daraja..." })}
           >
             <Send className="size-4" /> Batch Disburse
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-2xl h-14 gap-3 border-2 border-primary text-primary hover:bg-primary/5 transition-all"
+            onClick={() => setCreatingRecord(true)}
+          >
+            <Plus className="size-4" /> Add Payroll Record
           </Button>
         </div>
       </header>
@@ -400,6 +486,102 @@ export default function PayrollPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Payroll Record Modal */}
+      <Dialog open={creatingRecord} onOpenChange={(open) => !open && setCreatingRecord(false)}>
+        <DialogContent className="rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white max-w-md">
+          <div className="p-8 bg-slate-900 text-white relative">
+            <button onClick={() => setCreatingRecord(false)} className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors">
+              <X className="size-5" />
+            </button>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="size-12 bg-primary rounded-2xl flex items-center justify-center">
+                <PlusCircle className="size-6 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Create Payroll Record</DialogTitle>
+            </div>
+            <DialogDescription className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+              Add new payroll entry for staff member
+            </DialogDescription>
+          </div>
+          <div className="p-8 space-y-6">
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Staff Member</Label>
+              <Select value={newRecordForm.staffId} onValueChange={(v) => setNewRecordForm({...newRecordForm, staffId: v})}>
+                <SelectTrigger className="h-12 rounded-xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all">
+                  <SelectValue placeholder="Select staff" />
+                </SelectTrigger>
+                <SelectContent>
+                  {staff.map((s) => (
+                    <SelectItem key={s.id} value={s.id} className="capitalize text-sm">
+                      {s.name} (KES {s.base_salary.toLocaleString()}/mo)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Month</Label>
+              <Input
+                type="month"
+                value={newRecordForm.month}
+                onChange={(e) => setNewRecordForm({...newRecordForm, month: e.target.value})}
+                className="h-12 rounded-xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Base Amount (KES)</Label>
+                <Input
+                  type="number"
+                  value={newRecordForm.baseAmount}
+                  onChange={(e) => setNewRecordForm({...newRecordForm, baseAmount: e.target.value})}
+                  placeholder="Auto-filled from staff"
+                  className="h-12 rounded-xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all text-center"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Commission (KES)</Label>
+                <Input
+                  type="number"
+                  value={newRecordForm.commission}
+                  onChange={(e) => setNewRecordForm({...newRecordForm, commission: e.target.value})}
+                  placeholder="0"
+                  className="h-12 rounded-xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all text-center"
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Deductions (KES)</Label>
+              <Input
+                type="number"
+                value={newRecordForm.deductions}
+                onChange={(e) => setNewRecordForm({...newRecordForm, deductions: e.target.value})}
+                placeholder="0"
+                className="h-12 rounded-xl font-black text-lg border-2 bg-muted/50 focus:bg-background transition-all text-center"
+              />
+            </div>
+            <div className="p-6 bg-slate-900 text-white rounded-[2rem] border border-white/5 flex items-center gap-4 shadow-2xl">
+              <div className="size-12 bg-white/10 rounded-xl flex items-center justify-center">
+                <Calculator className="size-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <span className="text-[8px] font-black text-slate-500 uppercase block mb-1 tracking-widest">Estimated Net Pay</span>
+                <span className="text-2xl font-black italic tracking-tighter">
+                  KES {((parseFloat(newRecordForm.baseAmount) || 0) + (parseFloat(newRecordForm.commission) || 0) - (parseFloat(newRecordForm.deductions) || 0)).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="p-8 bg-slate-50 gap-3">
+            <Button variant="outline" className="h-16 rounded-2xl flex-1 font-black uppercase text-xs tracking-widest border-2" onClick={() => { setCreatingRecord(false); setNewRecordForm({ staffId: '', month: '', baseAmount: '', commission: '0', deductions: '0' }); }}>Cancel</Button>
+            <Button className="h-16 rounded-2xl flex-[2] font-black uppercase text-xs tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:bg-blue-600 transition-all text-white border-none" onClick={handleCreatePayrollRecord}>
+              <Check className="size-5 mr-3" /> Create Record
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

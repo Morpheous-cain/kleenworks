@@ -69,7 +69,7 @@ const EMPTY_FORM: AddStaffForm = {
   base_salary: "",
 }
 
-const ATTENDANCE_OPTIONS = ["present", "absent", "on_leave"]
+const ATTENDANCE_OPTIONS = ["Present", "Late", "Absent", "On-Leave"]
 
 const ROLE_OPTIONS = ["manager", "agent", "attendant"]
 
@@ -77,11 +77,13 @@ const ROLE_OPTIONS = ["manager", "agent", "attendant"]
 
 function attendanceBadgeClass(status: string | null) {
   switch (status) {
-    case "present":
+    case "Present":
       return "bg-emerald-500/10 text-emerald-600"
-    case "absent":
+    case "Late":
+      return "bg-blue-500/10 text-blue-600"
+    case "Absent":
       return "bg-destructive/10 text-destructive"
-    case "on_leave":
+    case "On-Leave":
       return "bg-amber-500/10 text-amber-600"
     default:
       return "bg-muted text-muted-foreground"
